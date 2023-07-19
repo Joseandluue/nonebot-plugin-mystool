@@ -5,6 +5,7 @@ import asyncio
 import random
 import threading
 from typing import Union
+import httpx
 
 from nonebot import get_bot, on_command
 from nonebot.adapters.onebot.v11 import (Bot, MessageSegment,
@@ -579,3 +580,49 @@ async def auto_resin_check():
     bot = get_bot()
     for qq in _conf.users:
         await resin_check(bot=bot, qq=qq, is_auto=True)
+
+#—————————————————————————————————————————————————————————————————————————————#
+from pydantic import BaseModel
+class rrjf_result(BaseModel):
+    """
+    人人图像相关返回数据初始化
+    """
+    integral: int
+    """剩余积分"""
+
+manually_rrjf = on_command(_conf.preference.command_start + '积分', priority=5, block=True)
+manually_rrjf.name = '积分'
+manually_rrjf.usage = '手动查看打码平台的积分信息'
+
+@manually_rrjf.handle()
+async def _(event: Union[GroupMessageEvent, PrivateMessageEvent]):
+    """
+    手动查询打码积分函数
+    :param url:api_link
+    :param integral:api返回内容中的积分位置
+    """
+    bot = get_bot(str(event.self_id))
+    user = _conf.users.get(event.user_id)
+    await api_rrjf(bot=bot, qq=event.user_id, group_event=event)
+
+async def api_rrjf(bot: Bot, qq: int, group_event: Union[GroupMessageEvent, PrivateMessageEvent, None] = None):
+    url = _conf.preference.geetest_url
+    msg = ""
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url)
+            if response.status_code == 200:
+                rrjf_data = response.json()
+                rrjf_res = rrjf_result.parse_obj(rrjf_data)
+                remaining_verification = int(rrjf_res.integral) // 25
+                msg += f"剩余可用积分：{rrjf_res.integral}" \
+                       f"\n剩余验证次数：{remaining_verification}"
+                if group_event:
+                    await bot.send(event=group_event, at_sender=True, message=msg)
+                else:
+                    await bot.send_private_msg(user_id=qq, message=msg)
+            else:
+                print("错误:", response.status_code)
+    except httpx.RequestError as e:
+        print("发生错误:", str(e))

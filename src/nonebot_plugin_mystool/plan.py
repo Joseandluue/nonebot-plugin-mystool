@@ -438,7 +438,7 @@ async def resin_check(bot: Bot, qq: int, is_auto: bool,
 async def resin_check_sr(bot: Bot, qq: int, is_auto: bool,
                       group_event: Union[GroupMessageEvent, PrivateMessageEvent, None] = None):
     """
-    查看星铁实时便笺函数，并发送给用户任务执行消息。
+    查看崩铁实时便笺函数，并发送给用户任务执行消息。
 
     :param bot: Bot实例
     :param qq: 用户QQ号
@@ -469,10 +469,10 @@ async def resin_check_sr(bot: Bot, qq: int, is_auto: bool,
                     if not is_auto:
                         if group_event:
                             await bot.send(event=group_event, at_sender=True,
-                                           message=f'⚠️账户 {account.bbs_uid} 没有绑定任何原神账户，请绑定后再重试')
+                                           message=f'⚠️账户 {account.bbs_uid} 没有绑定任何崩铁账户，请绑定后再重试')
                         else:
                             await bot.send_private_msg(user_id=qq,
-                                                       message=f'⚠️账户 {account.bbs_uid} 没有绑定任何原神账户，请绑定后再重试')
+                                                       message=f'⚠️账户 {account.bbs_uid} 没有绑定任何崩铁账户，请绑定后再重试')
                         account.enable_resin = False
                         write_plugin_data()
                         continue

@@ -82,8 +82,8 @@ async def _(event: Union[PrivateMessageEvent, GroupMessageEvent], matcher: Match
                     "\n- " + "、".join(map(lambda x: f"『{x.NAME}』", account.mission_games))
     user_setting += f"\n\n5️⃣ 原神树脂恢复提醒：{'开' if account.enable_resin else '关'}"
     user_setting += f"\n6️⃣更改便笺体力提醒阈值" \
-                     "\n    当前原神提醒阈值：{account.user_resin_threshold}" \
-                     "\n    当前崩铁提醒阈值：{account.user_stamina_threshold}"
+                    f"\n    当前原神提醒阈值：{account.user_resin_threshold}" \
+                    f"\n    当前崩铁提醒阈值：{account.user_stamina_threshold}"
     user_setting += "\n7️⃣⚠️删除账户数据"
 
     await account_setting.send(user_setting + '\n\n您要更改哪一项呢？请发送 1 / 2 / 3 / 4 / 5 / 6 / 7'

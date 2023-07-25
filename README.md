@@ -37,7 +37,22 @@ modify：
 
 
 
-### [📃源码说明](https://github.com/Ljzd-PRO/nonebot-plugin-mystool/wiki/Source-Structure)
-### 适配 [绪山真寻Bot](https://github.com/HibiKier/zhenxun_bot) 的分支
-- https://github.com/MWTJC/zhenxun-plugin-mystool
-- https://github.com/ayakasuki/nonebot-plugin-mystool
+## 使用说明
+
+### 🛠️ NoneBot2 机器人部署和插件安装
+
+请查看 -> [🔗Installation](https://github.com/Ljzd-PRO/nonebot-plugin-mystool/wiki/Installation)
+
+### 📖 插件具体使用说明
+
+请查看 -> [🔗Wiki 文档](https://github.com/Ljzd-PRO/nonebot-plugin-mystool/wiki)
+
+### ❓ 获取插件帮助信息
+
+#### 插件命令
+
+```
+/帮助
+```
+
+> ⚠️ 注意 此处没有使用 [🔗 插件命令头](https://github.com/Ljzd-PRO/nonebot-plugin-mystool/wiki/Configuration-Config#commandstart)

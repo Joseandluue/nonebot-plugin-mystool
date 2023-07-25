@@ -447,14 +447,25 @@ async def resin_check(bot: Bot, qq: int, is_auto: bool,
                     has_checked[account.bbs_uid]['transformer'] = True
             msg += "❖实时便笺❖" \
                    f"\n⏳树脂数量：{board.current_resin} / 160" \
+                   f"\n⏱️树脂将在{board.resin_recovery_text}回满" \
                    f"\n🕰️探索派遣：{board.current_expedition_num} / {board.max_expedition_num}" \
                    f"\n📅每日委托：{4 - board.finished_task_num} 个任务未完成" \
                    f"\n💰洞天财瓮：{board.current_home_coin} / {board.max_home_coin}" \
                    f"\n🎰参量质变仪：{board.transformer_text if board.transformer else 'N/A'}"
-            if group_event:
-                await bot.send(event=group_event, at_sender=True, message=msg)
+            if not is_auto:
+                if group_event:
+                    await bot.send(event=group_event, at_sender=True, message=msg)
+                else:
+                    await bot.send_private_msg(user_id=qq, message=msg)
             else:
-                await bot.send_private_msg(user_id=qq, message=msg)
+                if board.current_stamina >= account.user_resin_threshold:
+
+                    if group_event:
+                        await bot.send(event=group_event, at_sender=True, message=msg)
+                    else:
+                        await bot.send_private_msg(user_id=qq, message=msg)
+                else:
+                    logger.info(f"原神实时便笺：账户 {account.bbs_uid} 树脂:{board.current_resin},未满足推送条件")
 
 
 async def resin_check_sr(bot: Bot, qq: int, is_auto: bool,

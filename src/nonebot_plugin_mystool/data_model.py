@@ -362,6 +362,7 @@ class GenshinBoard(BaseModel):
     transformer: Optional[Dict[str, Any]]
     """参量质变仪相关数据"""
     resin_recovery_time: int
+    """剩余树脂恢复时间"""    
 
     @property
     def transformer_text(self):

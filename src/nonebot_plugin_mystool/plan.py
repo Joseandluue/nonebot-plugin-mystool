@@ -5,6 +5,7 @@ import asyncio
 import random
 import threading
 from typing import Union
+import httpx
 
 from nonebot import get_bot, on_command
 from nonebot.adapters.onebot.v11 import (Bot, MessageSegment,

@@ -1,4 +1,4 @@
-基于Ljzd-PRO/nonebot-plugin-mystool/v1.1.0修改:
+基于[Ljzd-PRO/nonebot-plugin-mystool](https://github.com/Ljzd-PRO/nonebot-plugin-mystool)/v1.1.0修改:
 
 add：
 ```

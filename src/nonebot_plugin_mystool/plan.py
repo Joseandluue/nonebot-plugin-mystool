@@ -649,7 +649,7 @@ async def key_rrjf(event: Union[GroupMessageEvent, PrivateMessageEvent]):
 
 
 async def api_rrjf(bot: Bot, qq: int, group_event: Union[GroupMessageEvent, PrivateMessageEvent, None] = None):
-    appkey = "7262da52b2b540d79ca366df9762d04f"
+    appkey = ""
     url = f"http://api.rrocr.com/api/integral.html?appkey={appkey}"
     msg = ""
 

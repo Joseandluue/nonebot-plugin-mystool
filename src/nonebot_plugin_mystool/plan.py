@@ -549,17 +549,6 @@ async def resin_check_sr(bot: Bot, qq: int, is_auto: bool,
                         msg += '❕您的每日实训已完成\n'
                 else:
                     has_checked[account.bbs_uid]['train_score'] = False
-                # 每周模拟宇宙积分提醒
-                if board.current_rogue_score == board.max_rogue_score:
-                    # 防止重复提醒
-                    if has_checked[account.bbs_uid]['rogue_score']:
-                        return
-                    else:
-                        has_checked[account.bbs_uid]['rogue_score'] = True
-                        msg += '❕您的模拟宇宙积分已经打满了\n\n'
-                else:
-                    has_checked[account.bbs_uid]['rogue_score'] = False
-                    return
             msg += "❖星穹铁道实时便笺❖" \
                    f"\n⏳开拓力数量：{board.current_stamina} / 180" \
                    f"\n⏱开拓力{board.stamina_recover_text}" \

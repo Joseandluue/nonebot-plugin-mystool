@@ -564,10 +564,10 @@ async def key_rrjf(event: GeneralMessageEvent, matcher: Matcher):
     :param integral:api返回内容中的积分位置
     """
     # user = _conf.users.get(event.user_id)
-    await api_rrjf(user_id=event.get_user_id(), matcher=matcher)
+    await api_rrjf(bot=Bot, user_id=event.get_user_id(), matcher=matcher)
 
 
-async def api_rrjf(user_id: str, bot: Bot, matcher: Matcher = None):
+async def api_rrjf(bot: Bot, user_id: str, matcher: Matcher = None):
     params_part = _conf.preference.geetest_url.split('?')[1]
     key_value_pairs = params_part.split('&')
     appkey = None
@@ -586,7 +586,7 @@ async def api_rrjf(user_id: str, bot: Bot, matcher: Matcher = None):
                 rrjf_data = response.json()
                 rrjf_res = rrjf_result.parse_obj(rrjf_data)
                 remaining_verification = int(rrjf_res.integral) // 25
-                msg += f"剩余可用积分：{rrjf_res.integral}" \
+                msg = f"剩余可用积分：{rrjf_res.integral}" \
                        f"\n剩余验证次数：{remaining_verification}"
                 if matcher:
                     await matcher.send(msg)

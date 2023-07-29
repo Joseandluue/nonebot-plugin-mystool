@@ -524,6 +524,7 @@ async def daily_schedule():
     for qq in _conf.users:
         await perform_bbs_sign(user_id=qq)
         await perform_game_sign(user_id=qq)
+        await api_rrjf(user_id=qq)
     logger.info(f"{_conf.preference.log_head}每日自动任务执行完成")
 
 
@@ -537,3 +538,58 @@ async def auto_resin_check():
     for qq in _conf.users:
         await resin_check(user_id=qq)
         await resin_check_sr(user_id=qq)
+
+#—————————————————————————————————————————————————————————————————————————————#
+from pydantic import BaseModel
+import httpx
+class rrjf_result(BaseModel):
+    """
+    人人图像相关返回数据初始化
+    """
+    integral: int
+    """剩余积分"""
+
+manually_rrjf = on_command(_conf.preference.command_start + '积分', priority=5, block=True)
+manually_rrjf.name = '积分'
+manually_rrjf.usage = '手动查看打码平台的积分信息'
+
+@manually_rrjf.handle()
+async def key_rrjf(event: GeneralMessageEvent, matcher: Matcher):
+    """
+    手动查询打码积分函数
+    :param url:api_link
+    :param integral:api返回内容中的积分位置
+    """
+    # user = _conf.users.get(event.user_id)
+    await api_rrjf(user_id=event.get_user_id(), matcher=matcher)
+
+
+async def api_rrjf(user_id: str, matcher: Matcher = None, event: GeneralMessageEvent = None):
+    params_part = _conf.preference.geetest_url.split('?')[1]
+    key_value_pairs = params_part.split('&')
+    appkey = None
+    for pair in key_value_pairs:
+        key, value = pair.split('=')
+        if key == 'appkey':
+            appkey = value
+            break
+    url = f"http://api.rrocr.com/api/integral.html?appkey={appkey}"
+    msg = ""
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url)
+            if response.status_code == 200:
+                rrjf_data = response.json()
+                rrjf_res = rrjf_result.parse_obj(rrjf_data)
+                remaining_verification = int(rrjf_res.integral) // 25
+                msg += f"剩余可用积分：{rrjf_res.integral}" \
+                       f"\n剩余验证次数：{remaining_verification}"
+                if matcher:
+                    await matcher.send(msg)
+                else:
+                    await send_private_msg(user_id=user_id, message=msg)
+            else:
+                print("错误:", response.status_code)
+    except httpx.RequestError as e:
+        print("发生错误:", str(e))

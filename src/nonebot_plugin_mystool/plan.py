@@ -5,9 +5,9 @@ import asyncio
 import random
 import threading
 
-from nonebot import on_command, get_adapters
+from nonebot import on_command, get_adapters, get_bot
 from nonebot.adapters.onebot.v11 import MessageSegment as OneBotV11MessageSegment, Adapter as OneBotV11Adapter, \
-    MessageEvent as OneBotV11MessageEvent
+    MessageEvent as OneBotV11MessageEvent, Bot
 from nonebot.adapters.qqguild import MessageSegment as QQGuildMessageSegment, Adapter as QQGuildAdapter, \
     MessageEvent as QQGuildMessageEvent
 from nonebot.adapters.qqguild.exception import AuditException
@@ -347,7 +347,7 @@ async def perform_bbs_sign(user_id: str, matcher: Matcher = None):
         write_plugin_data()
 
 
-async def resin_check(user_id: str, matcher: Matcher = None):
+async def resin_check(bot: Bot, user_id: str, matcher: Matcher = None):
     """
     查看原神实时便笺函数，并发送给用户任务执行消息。
 
@@ -426,12 +426,12 @@ async def resin_check(user_id: str, matcher: Matcher = None):
                 await matcher.send(msg)
             else:
                 if board.current_resin >= account.user_resin_threshold:
-                    await send_private_msg(user_id=user_id, message=msg)
+                    await bot.send_private_msg(user_id=user_id, message=msg)
                 else:
                     logger.info(f"原神实时便笺：账户 {account.bbs_uid} 树脂:{board.current_resin},未满足推送条件")
 
 
-async def resin_check_sr(user_id: str, matcher: Matcher = None):
+async def resin_check_sr(bot: Bot, user_id: str, matcher: Matcher = None):
     """
     查看星铁实时便笺函数，并发送给用户任务执行消息。
 
@@ -497,7 +497,7 @@ async def resin_check_sr(user_id: str, matcher: Matcher = None):
                 await matcher.send(msg)
             else:
                 if board.current_stamina >= account.user_stamina_threshold:
-                    await send_private_msg(user_id=user_id, message=msg)
+                    await bot.send_private_msg(user_id=user_id, message=msg)
                 else:
                     logger.info(f"崩铁实时便笺：账户 {account.bbs_uid} 开拓力:{board.current_stamina},未满足推送条件")
 
@@ -537,9 +537,10 @@ async def auto_resin_check():
     """
     自动查看实时便笺
     """
+    bot = get_bot()
     for qq in _conf.users:
-        await resin_check(user_id=qq)
-        await resin_check_sr(user_id=qq)
+        await resin_check(bot=bot, user_id=qq)
+        await resin_check_sr(bot=bot, user_id=qq)
 
 #—————————————————————————————————————————————————————————————————————————————#
 from pydantic import BaseModel
@@ -566,7 +567,7 @@ async def key_rrjf(event: GeneralMessageEvent, matcher: Matcher):
     await api_rrjf(user_id=event.get_user_id(), matcher=matcher)
 
 
-async def api_rrjf(user_id: str, matcher: Matcher = None, event: GeneralMessageEvent = None):
+async def api_rrjf(user_id: str, bot: Bot, matcher: Matcher = None):
     params_part = _conf.preference.geetest_url.split('?')[1]
     key_value_pairs = params_part.split('&')
     appkey = None
@@ -590,7 +591,7 @@ async def api_rrjf(user_id: str, matcher: Matcher = None, event: GeneralMessageE
                 if matcher:
                     await matcher.send(msg)
                 else:
-                    await send_private_msg(user_id=user_id, message=msg)
+                    await bot.send_private_msg(user_id=user_id, message=msg)
             else:
                 print("错误:", response.status_code)
     except httpx.RequestError as e:

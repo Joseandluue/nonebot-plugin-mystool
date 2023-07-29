@@ -525,6 +525,7 @@ async def daily_schedule():
         await perform_bbs_sign(user_id=qq)
         await perform_game_sign(user_id=qq)
         await api_rrjf(user_id=qq)
+
     logger.info(f"{_conf.preference.log_head}每日自动任务执行完成")
 
 

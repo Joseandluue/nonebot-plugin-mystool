@@ -9,9 +9,11 @@ modify：
 打码返回内容的获取对象
 ```
 
+
 # mysTool - 米游社辅助工具插件
 
 ## 📣 更新内容
+
 ### 2023.7.28 - v1.2.0-beta.1
 - 增加对QQ频道的支持 #128
   > 说明文档：[🔗QQGuild 适配器](https://github.com/Ljzd-PRO/nonebot-plugin-mystool/wiki/Installation#QQGuild-适配器)
@@ -41,10 +43,3 @@ modify：
 ```
 
 > ⚠️ 注意 此处没有使用 [🔗 插件命令头](https://github.com/Ljzd-PRO/nonebot-plugin-mystool/wiki/Configuration-Config#commandstart)
-
-## 其他
-
-### [📃源码说明](https://github.com/Ljzd-PRO/nonebot-plugin-mystool/wiki/Source-Structure)
-### 适配 [绪山真寻Bot](https://github.com/HibiKier/zhenxun_bot) 的分支
-- https://github.com/MWTJC/zhenxun-plugin-mystool
-- https://github.com/ayakasuki/nonebot-plugin-mystool

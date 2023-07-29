@@ -6,8 +6,9 @@ rrocr积分查询
 ```
 modify：
 ```
-打码返回内容的获取对象
+打码返回内容的获取对象 
 ```
+  > 修改的签到代码 from @Night-stars-1 [mystool](https://github.com/Night-stars-1/nonebot-plugin-mystool)
 
 
 # mysTool - 米游社辅助工具插件

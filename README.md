@@ -10,6 +10,12 @@ modify：
 ```
   > 修改的签到代码 from @Night-stars-1 [mystool](https://github.com/Night-stars-1/nonebot-plugin-mystool)
 
+fix：
+```
+v1.5经测试便笺自动检查推送相关有问题，当matcher='None'时，无法触发条件
+    v1.6中便笺自动推送改为Ljzd-PRO/nonebot-plugin-mystoo/v1.01版本使用的BOT模块
+```
+
 
 # mysTool - 米游社辅助工具插件
 

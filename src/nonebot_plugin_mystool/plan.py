@@ -100,10 +100,11 @@ manually_resin_check_sr = on_command(
 )
 manually_resin_check_sr.name = '星穹铁道便笺'
 manually_resin_check_sr.usage = '手动查看星穹铁道实时便笺，即开拓力、每日实训、每周模拟宇宙积分等信息'
+has_checked_sr = {}
 for user in _conf.users.values():
     for account in user.accounts.values():
         if account.enable_resin:
-            has_checked[account.bbs_uid] = has_checked.get(account.bbs_uid,
+            has_checked_sr[account.bbs_uid] = has_checked_sr.get(account.bbs_uid,
                                                            {"stamina": False, "train_score": False,
                                                             "rogue_score": False})
 
@@ -437,11 +438,11 @@ async def resin_check_sr(user_id: str, matcher: Matcher = None):
     :param user_id: 用户QQ号
     :param matcher: 事件响应器
     """
-    global has_checked
+    global has_checked_sr
     user = _conf.users[user_id]
     for account in user.accounts.values():
         if account.enable_resin:
-            has_checked[account.bbs_uid] = has_checked.get(account.bbs_uid,
+            has_checked_sr[account.bbs_uid] = has_checked_sr.get(account.bbs_uid,
                                                            {"stamina": False, "train_score": False,
                                                             "rogue_score": False})
         if account.enable_resin or matcher:
@@ -468,23 +469,23 @@ async def resin_check_sr(user_id: str, matcher: Matcher = None):
                 # 体力溢出提醒
                 if board.current_stamina == 180:
                     # 防止重复提醒
-                    if has_checked[account.bbs_uid]['stamina']:
+                    if has_checked_sr[account.bbs_uid]['stamina']:
                         return
                     else:
-                        has_checked[account.bbs_uid]['stamina'] = True
+                        has_checked_sr[account.bbs_uid]['stamina'] = True
                         msg += '❕您的开拓力已经满啦\n'
                 else:
-                    has_checked[account.bbs_uid]['stamina'] = False
+                    has_checked_sr[account.bbs_uid]['stamina'] = False
                 # 每日实训状态提醒
                 if board.current_train_score == board.max_train_score:
                     # 防止重复提醒
-                    if has_checked[account.bbs_uid]['train_score']:
+                    if has_checked_sr[account.bbs_uid]['train_score']:
                         return
                     else:
-                        has_checked[account.bbs_uid]['train_score'] = True
+                        has_checked_sr[account.bbs_uid]['train_score'] = True
                         msg += '❕您的每日实训已完成\n'
                 else:
-                    has_checked[account.bbs_uid]['train_score'] = False
+                    has_checked_sr[account.bbs_uid]['train_score'] = False
             msg += "❖星穹铁道实时便笺❖" \
                    f"\n⏳开拓力数量：{board.current_stamina} / 180" \
                    f"\n⏱开拓力{board.stamina_recover_text}" \

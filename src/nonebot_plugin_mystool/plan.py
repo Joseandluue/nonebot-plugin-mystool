@@ -83,10 +83,11 @@ async def _(event: GeneralMessageEvent, matcher: Matcher):
     """
     手动查看原神便笺
     """
+    bot = get_bot(str(event.self_id))
     user = _conf.users.get(event.get_user_id())
     if not user or not user.accounts:
         await manually_game_sign.finish(f"⚠️你尚未绑定米游社账户，请先使用『{COMMAND_BEGIN}登录』进行登录")
-    await resin_check(user_id=event.get_user_id(), matcher=matcher)
+    await resin_check(bot=bot, user_id=event.get_user_id(), matcher=matcher)
 
 
 manually_resin_check_sr = on_command(
@@ -114,10 +115,11 @@ async def _(event: GeneralMessageEvent, matcher: Matcher):
     """
     手动查看星穹铁道便笺（sr）
     """
+    bot = get_bot(str(event.self_id))
     user = _conf.users.get(event.get_user_id())
     if not user or not user.accounts:
         await manually_game_sign.finish(f"⚠️你尚未绑定米游社账户，请先使用『{COMMAND_BEGIN}登录』进行登录")
-    await resin_check_sr(user_id=event.get_user_id(), matcher=matcher)
+    await resin_check_sr(bot=bot, user_id=event.get_user_id(), matcher=matcher)
 
 
 async def perform_game_sign(user_id: str, matcher: Matcher = None, event: GeneralMessageEvent = None):
@@ -522,10 +524,11 @@ async def daily_schedule():
     # 随机延迟
     await asyncio.sleep(random.randint(0, 59))
     logger.info(f"{_conf.preference.log_head}开始执行每日自动任务")
+    bot = get_bot()
     for qq in _conf.users:
         await perform_bbs_sign(user_id=qq)
         await perform_game_sign(user_id=qq)
-        await api_rrjf(user_id=qq)
+        await api_rrjf(bot=bot, user_id=qq)
 
     logger.info(f"{_conf.preference.log_head}每日自动任务执行完成")
 

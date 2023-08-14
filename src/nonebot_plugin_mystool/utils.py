@@ -237,16 +237,17 @@ async def get_validate(gt: str = None, challenge: str = None, retry: bool = True
 
     if gt and challenge and _conf.preference.geetest_url:
         try:
+            url_with_geetest_url = f"{_conf.preference.geetest_url}&referer=https://webstatic.mihoyo.com/&gt={gt}&challenge={challenge}"
             async for attempt in get_async_retry(retry):
                 with attempt:
                     async with httpx.AsyncClient() as client:
                         res = await client.post(
-                            _conf.preference.geetest_url,
+                            url_with_geetest_url,
                             timeout=60,
                             json=content)
                     geetest_data = res.json()
-                    if geetest_data['data']['result'] != 'fail':
-                        return GeetestResult(validate=geetest_data['data']['validate'], seccode="")
+                    logger.info(f"打码:{geetest_data}")
+                    return GeetestResult(validate=geetest_data['data']['validate'], seccode="")
         except tenacity.RetryError:
             logger.exception(f"{_conf.preference.log_head}获取人机验证validate失败")
     else:
@@ -401,6 +402,12 @@ async def send_private_msg(
             else:
                 return True
 
+class MystoolException(Exception):
+    """Base genshinhelper exception."""
+
+    def __init__(self, message):
+        super().__init__(message)
+        logger.error(message)
 
 # TODO: 一个用于构建on_command事件相应器的函数，
 #  将使用偏好设置里的priority优先级和block设置，

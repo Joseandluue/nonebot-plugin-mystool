@@ -1,6 +1,7 @@
 """
 ### 用户设置相关
 """
+from typing import Union
 
 from nonebot import on_command
 from nonebot.internal.params import ArgStr
@@ -21,7 +22,7 @@ setting.usage = '如需配置是否开启每日任务、设备平台、频道任
 
 
 @setting.handle()
-async def _(_: GeneralMessageEvent):
+async def _(_: Union[GeneralMessageEvent]):
     msg = f'如需配置是否开启每日任务、设备平台、频道任务等相关选项，请使用『{COMMAND_BEGIN}账号设置』命令' \
           f'\n如需设置米游币任务和游戏签到后是否进行QQ通知，请使用『{COMMAND_BEGIN}通知设置』命令'
     await setting.send(msg)
@@ -33,7 +34,7 @@ account_setting.usage = "配置游戏自动签到、米游币任务是否开启�
 
 
 @account_setting.handle()
-async def _(event: GeneralMessageEvent, matcher: Matcher, state: T_State):
+async def _(event: Union[GeneralMessageEvent], matcher: Matcher, state: T_State):
     """
     账号设置命令触发
     """
@@ -53,7 +54,7 @@ async def _(event: GeneralMessageEvent, matcher: Matcher, state: T_State):
 
 
 @account_setting.got('bbs_uid')
-async def _(event: GeneralMessageEvent, matcher: Matcher, state: T_State, bbs_uid=ArgStr()):
+async def _(event: Union[GeneralMessageEvent], matcher: Matcher, state: T_State, bbs_uid=ArgStr()):
     """
     根据手机号设置相应的账户
     """
@@ -87,7 +88,7 @@ async def _(event: GeneralMessageEvent, matcher: Matcher, state: T_State, bbs_ui
 
 
 @account_setting.got('setting_id')
-async def _(event: GeneralMessageEvent, state: T_State, setting_id=ArgStr()):
+async def _(event: Union[GeneralMessageEvent], state: T_State, setting_id=ArgStr()):
     """
     根据所选更改相应账户的相应设置
     """
@@ -150,7 +151,7 @@ async def _(event: GeneralMessageEvent, state: T_State, setting_id=ArgStr()):
 
 
 @account_setting.got('notice_game')
-async def _(_: GeneralMessageEvent, state: T_State, notice_game=ArgStr()):
+async def _(_: Union[GeneralMessageEvent], state: T_State, notice_game=ArgStr()):
     if notice_game == '退出':
         await account_setting.finish('🚪已成功退出')
     elif state["setting_item"] == "setting_notice_value":
@@ -173,7 +174,7 @@ async def _(_: GeneralMessageEvent, state: T_State, notice_game=ArgStr()):
 
 
 @account_setting.got('setting_value')
-async def _(_: GeneralMessageEvent, state: T_State, setting_value=ArgStr()):
+async def _(_: Union[GeneralMessageEvent], state: T_State, setting_value=ArgStr()):
     if setting_value == '退出':
         await account_setting.finish('🚪已成功退出')
     account: UserAccount = state['account']
@@ -188,7 +189,7 @@ async def _(_: GeneralMessageEvent, state: T_State, setting_value=ArgStr()):
                 # 输入有效的数字范围，将 resin_threshold 赋值为输入的整数
                 account.user_resin_threshold = resin_threshold
                 write_plugin_data()
-                await account_setting.finish(f"更改原神便笺树脂提醒阈值成功\n"
+                await account_setting.finish("更改原神便笺树脂提醒阈值成功\n"
                                              f"⏰当前提醒阈值：{resin_threshold}")
             else:
                 await account_setting.reject("⚠️输入的数字范围应在 0 到 160 之间。")
@@ -203,7 +204,7 @@ async def _(_: GeneralMessageEvent, state: T_State, setting_value=ArgStr()):
                 # 输入有效的数字范围，将 stamina_threshold 赋值为输入的整数
                 account.user_stamina_threshold = stamina_threshold
                 write_plugin_data()
-                await account_setting.finish(f"更改崩铁便笺开拓力提醒阈值成功\n"
+                await account_setting.finish("更改崩铁便笺开拓力提醒阈值成功\n"
                                              f"⏰当前提醒阈值：{stamina_threshold}")
             else:
                 await account_setting.reject("⚠️输入的数字范围应在 0 到 180 之间。")
@@ -231,7 +232,7 @@ global_setting.usage = "设置每日签到后是否进行QQ通知"
 
 
 @global_setting.handle()
-async def _(event: GeneralMessageEvent, matcher: Matcher):
+async def _(event: Union[GeneralMessageEvent], matcher: Matcher):
     """
     通知设置命令触发
     """
@@ -242,7 +243,7 @@ async def _(event: GeneralMessageEvent, matcher: Matcher):
 
 
 @global_setting.got('choice')
-async def _(event: GeneralMessageEvent, matcher: Matcher, choice=ArgStr()):
+async def _(event: Union[GeneralMessageEvent], matcher: Matcher, choice=ArgStr()):
     """
     根据选择变更通知设置
     """

@@ -741,7 +741,7 @@ async def check_registrable(phone_number: int, keep_client: bool = False, retry:
 
 async def create_mmt(client: Optional[httpx.AsyncClient] = None,
                      use_v4: bool = True,
-                     device_id: str = generate_device_id(),
+                     device_id: str = None,
                      retry: bool = True) -> Tuple[
     BaseApiStatus, Optional[MmtData], str, Optional[httpx.AsyncClient]]:
     """
@@ -754,7 +754,7 @@ async def create_mmt(client: Optional[httpx.AsyncClient] = None,
     :return: (API返回状态, 人机验证任务数据, 设备ID, httpx.AsyncClient连接对象)
     """
     headers = HEADERS_WEBAPI.copy()
-    headers["x-rpc-device_id"] = device_id
+    headers["x-rpc-device_id"] = device_id or generate_device_id()
     if use_v4:
         headers.setdefault("x-rpc-source", "accountWebsite")
 
@@ -790,16 +790,16 @@ async def create_mmt(client: Optional[httpx.AsyncClient] = None,
             return BaseApiStatus(network_error=True), None, device_id, None
 
 
-async def create_mobile_captcha(phone_number: int,
+async def create_mobile_captcha(phone_number: str,
                                 mmt_data: MmtData,
-                                geetest_result: Union[GeetestResult, GeetestResultV4],
+                                geetest_result: Union[GeetestResult, GeetestResultV4] = None,
                                 client: Optional[httpx.AsyncClient] = None,
                                 use_v4: bool = True,
                                 device_id: str = None,
                                 retry: bool = True
                                 ) -> Tuple[CreateMobileCaptchaStatus, Optional[httpx.AsyncClient]]:
     """
-    发送短信验证码
+    发送短信验证码，可尝试不传入 geetest_result，即不进行人机验证
 
     :param phone_number: 手机号
     :param mmt_data: 人机验证任务数据
@@ -817,16 +817,23 @@ async def create_mobile_captcha(phone_number: int,
             "action_type": "login",
             "mmt_key": mmt_data.mmt_key,
             "geetest_v4_data": str(geetest_v4_data).replace("'", '"'),
-            "mobile": str(phone_number),
+            "mobile": phone_number,
             "t": str(round(time.time() * 1000))
         }
-    else:
+    elif geetest_result:
         content = {
             "action_type": "login",
             "mmt_key": mmt_data.mmt_key,
             "geetest_challenge": mmt_data.challenge,
             "geetest_validate": geetest_result.validate,
             "geetest_seccode": geetest_result.seccode,
+            "mobile": phone_number,
+            "t": round(time.time() * 1000)
+        }
+    else:
+        content = {
+            "action_type": "login",
+            "mmt_key": mmt_data.mmt_key,
             "mobile": phone_number,
             "t": round(time.time() * 1000)
         }
@@ -853,6 +860,14 @@ async def create_mobile_captcha(phone_number: int,
                     return CreateMobileCaptchaStatus(success=True), client
                 elif api_result.wrong_captcha:
                     return CreateMobileCaptchaStatus(incorrect_geetest=True), client
+                elif api_result.retcode == -217:
+                    return CreateMobileCaptchaStatus(not_registered=True), client
+                elif api_result.retcode == -103:
+                    return CreateMobileCaptchaStatus(invalid_phone_number=True), client
+                elif api_result.retcode == -213:
+                    return CreateMobileCaptchaStatus(too_many_requests=True), client
+                else:
+                    return CreateMobileCaptchaStatus(), client
     except tenacity.RetryError as e:
         if client:
             await client.aclose()
@@ -867,6 +882,7 @@ async def create_mobile_captcha(phone_number: int,
 
 async def get_login_ticket_by_captcha(phone_number: str,
                                       captcha: int,
+                                      device_id: str = None,
                                       client: Optional[httpx.AsyncClient] = None,
                                       retry: bool = True) -> \
         Tuple[
@@ -876,6 +892,7 @@ async def get_login_ticket_by_captcha(phone_number: str,
 
     :param phone_number: 手机号
     :param captcha: 短信验证码
+    :param device_id: 设备ID
     :param client: httpx.AsyncClient 连接
     :param retry: 是否允许重试
 
@@ -885,7 +902,7 @@ async def get_login_ticket_by_captcha(phone_number: str,
     """
 
     headers = HEADERS_WEBAPI.copy()
-    headers["x-rpc-device_id"] = generate_device_id()
+    headers["x-rpc-device_id"] = device_id or generate_device_id()
     params = {
         "mobile": phone_number,
         "mobile_captcha": captcha,
@@ -1081,7 +1098,7 @@ async def get_login_ticket_by_password(account: str, password: str, mmt_data: Mm
             return GetCookieStatus(network_error=True), None
 
 
-async def get_cookie_token_by_stoken(cookies: BBSCookies, device_id: Optional[str] = None, retry: bool = True) -> Tuple[
+async def get_cookie_token_by_stoken(cookies: BBSCookies, device_id: str = None, retry: bool = True) -> Tuple[
     GetCookieStatus, Optional[BBSCookies]]:
     """
     通过 stoken_v2 获取 cookie_token
@@ -1130,7 +1147,7 @@ async def get_cookie_token_by_stoken(cookies: BBSCookies, device_id: Optional[st
             return GetCookieStatus(network_error=True), None
 
 
-async def get_stoken_v2_by_v1(cookies: BBSCookies, device_id: Optional[str] = None, retry: bool = True) -> Tuple[
+async def get_stoken_v2_by_v1(cookies: BBSCookies, device_id: str = None, retry: bool = True) -> Tuple[
     GetCookieStatus, Optional[BBSCookies]]:
     """
     通过 stoken_v1 获取 stoken_v2 以及 mid
@@ -1144,7 +1161,7 @@ async def get_stoken_v2_by_v1(cookies: BBSCookies, device_id: Optional[str] = No
     >>> assert asyncio.new_event_loop().run_until_complete(coroutine)[0].success is False
     """
     headers = HEADERS_PASSPORT_API.copy()
-    headers["x-rpc-device_id"] = device_id if device_id else generate_device_id()
+    headers["x-rpc-device_id"] = device_id or generate_device_id()
     headers.setdefault("x-rpc-aigis", "")
     headers.setdefault("x-rpc-app_id", "bll8iq97cem8")
 
@@ -1184,7 +1201,7 @@ async def get_stoken_v2_by_v1(cookies: BBSCookies, device_id: Optional[str] = No
             return GetCookieStatus(network_error=True), None
 
 
-async def get_ltoken_by_stoken(cookies: BBSCookies, device_id: Optional[str] = None, retry: bool = True) -> Tuple[
+async def get_ltoken_by_stoken(cookies: BBSCookies, device_id: str = None, retry: bool = True) -> Tuple[
     GetCookieStatus, Optional[BBSCookies]]:
     """
     通过 stoken_v2 和 mid 获取 ltoken

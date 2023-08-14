@@ -37,11 +37,11 @@ if TYPE_CHECKING:
 
 _conf = PluginDataManager.plugin_data
 
-GeneralMessageEvent = Union[OneBotV11MessageEvent, MessageCreateEvent, DirectMessageCreateEvent]
+GeneralMessageEvent = OneBotV11MessageEvent, MessageCreateEvent, DirectMessageCreateEvent
 """消息事件类型"""
-GeneralPrivateMessageEvent = Union[PrivateMessageEvent, DirectMessageCreateEvent]
+GeneralPrivateMessageEvent = PrivateMessageEvent, DirectMessageCreateEvent
 """私聊消息事件类型"""
-GeneralGroupMessageEvent = Union[GroupMessageEvent, MessageCreateEvent]
+GeneralGroupMessageEvent = GroupMessageEvent, MessageCreateEvent
 """群聊消息事件类型"""
 
 
@@ -313,7 +313,7 @@ def generate_qr_img(data: str):
     >>> b = generate_qr_img("https://github.com/Ljzd-PRO/nonebot-plugin-mystool")
     >>> isinstance(b, bytes)
     """
-    qr_code = QRCode()
+    qr_code = QRCode(border=2)
     qr_code.add_data(data)
     qr_code.make()
     image = qr_code.make_image()

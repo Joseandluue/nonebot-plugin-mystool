@@ -2,12 +2,13 @@
 ### QQ好友相关、用户绑定相关
 """
 import asyncio
+from typing import Union
 from uuid import uuid4
 
 from nonebot import get_driver, on_request, on_command, Bot
 from nonebot.adapters.onebot.v11 import FriendRequestEvent, GroupRequestEvent, RequestEvent, Bot as OneBotV11Bot, \
     ActionFailed as OneBotV11ActionFailed
-from nonebot.adapters.qqguild import Bot as QQGuildBot
+from nonebot.adapters.qqguild import Bot as QQGuildBot, DirectMessageCreateEvent, MessageCreateEvent
 from nonebot.adapters.qqguild.exception import ActionFailed as QQGuildActionFailed
 from nonebot.internal.matcher import Matcher
 from nonebot.params import CommandArg, Command
@@ -83,7 +84,7 @@ user_binding.extra_usage = """\
 
 @user_binding.handle()
 async def _(
-        event: GeneralMessageEvent,
+        event: Union[GeneralMessageEvent],
         matcher: Matcher,
         command=Command(),
         command_arg=CommandArg()
@@ -98,8 +99,7 @@ async def _(
                 await matcher.finish("⚠️为了保护您的隐私，请私聊进行UUID密钥查看。")
 
             await matcher.send(
-                "🔑您的UUID密钥为：\n" if user_id not in _conf.user_bind else
-                "🔑您绑定的用户数据的UUID密钥为：\n"
+                f"{'🔑您的UUID密钥为：' if user_id not in _conf.user_bind else '🔑您绑定的用户数据的UUID密钥为：'}\n"
                 f"{user.uuid.upper()}\n"
                 "可用于其他聊天平台进行数据绑定，请不要泄露给他人"
             )
@@ -148,8 +148,7 @@ async def _(
             write_plugin_data()
 
             await matcher.send(
-                "✔已刷新UUID密钥，原先绑定的用户将无法访问当前用户数据\n" if be_bind else
-                "✔已刷新您绑定的用户数据的UUID密钥，目前您的用户数据已为空，您也可以再次绑定\n"
+                f"{'✔已刷新UUID密钥，原先绑定的用户将无法访问当前用户数据' if be_bind else '✔已刷新您绑定的用户数据的UUID密钥，目前您的用户数据已为空，您也可以再次绑定'}\n"
                 f"🔑新的UUID密钥：{user.uuid.upper()}\n"
                 "可用于其他聊天平台进行数据绑定，请不要泄露给他人"
             )
@@ -186,12 +185,13 @@ async def _(
             _conf.do_user_bind(user_id, target_id)
             user = _conf.users[user_id]
             user.qq_guilds.setdefault(user_id, set())
-            if isinstance(event, GeneralGroupMessageEvent):
+            if isinstance(event, DirectMessageCreateEvent):
+                user.qq_guilds[user_id].add(event.channel_id)
+            elif isinstance(event, MessageCreateEvent):
                 user.qq_guilds[user_id].add(event.guild_id)
+            if isinstance(event, GeneralGroupMessageEvent):
                 user.uuid = str(uuid4())
                 await matcher.send("🔑由于您在群聊中进行绑定，已刷新您的UUID密钥，但不会影响其他已绑定用户")
-            else:
-                user.qq_guilds[user_id].add(event.channel_id)
             write_plugin_data()
             await matcher.send(f"✔已绑定用户 {target_id} 的用户数据")
 
@@ -211,7 +211,7 @@ direct_msg_respond.usage = '让机器人私信发送给您一条消息，防止�
 
 
 @direct_msg_respond.handle()
-async def _(bot: Bot, event: GeneralGroupMessageEvent):
+async def _(bot: Bot, event: Union[GeneralGroupMessageEvent]):
     msg_text = f"{PLUGIN.metadata.name}" \
                f"{PLUGIN.metadata.description}\n" \
                "具体用法：\n" \
@@ -225,7 +225,7 @@ async def _(bot: Bot, event: GeneralGroupMessageEvent):
         ):
             await direct_msg_respond.send("✔已发送私信，请查看私信消息")
         else:
-            await direct_msg_respond.send(f"⚠️发送私信失败，请检查后台日志")
+            await direct_msg_respond.send("⚠️发送私信失败，请检查后台日志")
     except (QQGuildActionFailed, OneBotV11ActionFailed) as e:
         if isinstance(e, QQGuildActionFailed):
             if e.code == 304049:

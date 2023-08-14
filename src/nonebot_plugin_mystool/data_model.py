@@ -294,9 +294,9 @@ class MmtData(BaseModel):
     短信验证码-人机验证任务申请-返回数据
     """
     challenge: Optional[str]
-    gt: str
+    gt: Optional[str]
     mmt_key: str
-    new_captcha: bool
+    new_captcha: Optional[bool]
     risk_type: Optional[str]
     """任务类型，如滑动拼图 slide"""
     success: Optional[int]
@@ -481,6 +481,12 @@ class CreateMobileCaptchaStatus(BaseApiStatus):
     """
     incorrect_geetest = False
     """人机验证结果数据无效"""
+    not_registered = False
+    """手机号码未注册"""
+    invalid_phone_number = False
+    """手机号码无效"""
+    too_many_requests = False
+    """发送过于频繁"""
 
 
 class GetCookieStatus(BaseApiStatus):

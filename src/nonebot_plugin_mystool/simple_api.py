@@ -1536,13 +1536,13 @@ async def StarRail_board(account: UserAccount) -> Tuple[
                         async with httpx.AsyncClient() as client:
 
                             cookies = account.cookies.dict(v2_stoken=True, cookie_type=True)
-                            logger.info(f"StarRail_board headers :  {headers}")
-                            logger.info(f"StarRail_board cookies :  {cookies}")
+                            #logger.info(f"StarRail_board headers :  {headers}")
+                            #logger.info(f"StarRail_board cookies :  {cookies}")
                             res = await client.get(url, headers=headers,
                                                    cookies=cookies,
                                                    timeout=_conf.preference.timeout)
                         api_result = ApiResultHandler(res.json())
-                        logger.info(f"simple_api StarRail_board api_result : {api_result}")
+                        #logger.info(f"simple_api StarRail_board api_result : {api_result}")
                         if api_result.login_expired:
                             logger.info(
                                 f"崩铁实时便笺: 用户 {account.bbs_uid} 登录失效")

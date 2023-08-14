@@ -570,10 +570,10 @@ async def key_rrjf(event: GeneralMessageEvent, matcher: Matcher):
     :param integral:api返回内容中的积分位置
     """
     # user = _conf.users.get(event.user_id)
-    await api_rrjf(bot=Bot, user_id=event.get_user_id(), matcher=matcher)
+    await api_rrjf(user_id=event.get_user_id(), matcher=matcher)
 
 
-async def api_rrjf(bot: Bot, user_id: str, matcher: Matcher = None):
+async def api_rrjf(user_id: str, matcher: Matcher = None):
     params_part = _conf.preference.geetest_url.split('?')[1]
     key_value_pairs = params_part.split('&')
     appkey = None
@@ -597,7 +597,7 @@ async def api_rrjf(bot: Bot, user_id: str, matcher: Matcher = None):
                 if matcher:
                     await matcher.send(msg)
                 else:
-                    await bot.send_private_msg(user_id=user_id, message=msg)
+                    await send_private_msg(user_id=user_id, message=msg)
             else:
                 print("错误:", response.status_code)
     except httpx.RequestError as e:

@@ -1463,20 +1463,21 @@ async def genshin_board(account: UserAccount) -> Tuple[
                                                    cookies=account.cookies.dict(v2_stoken=True, cookie_type=True),
                                                    timeout=_conf.preference.timeout)
                         api_result = ApiResultHandler(res.json())
+                        #logger.debug(f'原神NO1:{api_result}')
                         if api_result.login_expired:
                             logger.info(
                                 f"原神实时便笺: 用户 {account.bbs_uid} 登录失效")
-                            logger.debug(f"网络请求返回: {res.text}")
+                            logger.debug(f"原神便笺，网络请求返回: {res.text}")
                             return GenshinBoardStatus(login_expired=True), None
 
                         if api_result.invalid_ds:
                             logger.info(
                                 f"原神实时便笺: 用户 {account.bbs_uid} DS 校验失败")
-                            logger.debug(f"网络请求返回: {res.text}")
+                            logger.debug(f"原神便笺，网络请求返回: {res.text}")
                         if api_result.retcode == 1034:
                             logger.info(
                                 f"原神实时便笺: 用户 {account.bbs_uid} 可能被验证码阻拦")
-                            logger.debug(f"网络请求返回: {res.text}")
+                            logger.debug(f"原神便笺，网络请求返回: {res.text}")
                         if api_result.invalid_ds or api_result.retcode == 1034:
                             headers["DS"] = generate_ds()
                             headers["x-rpc-device_id"] = account.device_id_ios
@@ -1488,13 +1489,14 @@ async def genshin_board(account: UserAccount) -> Tuple[
                                     timeout=_conf.preference.timeout
                                 )
                             api_result = ApiResultHandler(res.json())
+                            #logger.debug(f'原神NO2:{api_result}')
                             return GenshinBoardStatus(success=True), \
                                 GenshinBoard.parse_obj(api_result.data)
                         return GenshinBoardStatus(success=True), GenshinBoard.parse_obj(api_result.data)
             except tenacity.RetryError as e:
                 if is_incorrect_return(e):
                     logger.exception(f"原神实时便笺: 服务器没有正确返回")
-                    logger.debug(f"网络请求返回: {res.text}")
+                    logger.debug(f"原神便笺，网络请求返回: {res.text}")
                     return GenshinBoardStatus(incorrect_return=True), None
                 else:
                     logger.exception(f"原神实时便笺: 请求失败")
@@ -1536,13 +1538,13 @@ async def StarRail_board(account: UserAccount) -> Tuple[
                         async with httpx.AsyncClient() as client:
 
                             cookies = account.cookies.dict(v2_stoken=True, cookie_type=True)
-                            logger.info(f"StarRail_board headers :  {headers}")
-                            logger.info(f"StarRail_board cookies :  {cookies}")
+                            #logger.info(f"StarRail_board headers :  {headers}")
+                            #logger.info(f"StarRail_board cookies :  {cookies}")
                             res = await client.get(url, headers=headers,
                                                    cookies=cookies,
                                                    timeout=_conf.preference.timeout)
                         api_result = ApiResultHandler(res.json())
-                        logger.info(f"simple_api StarRail_board api_result : {api_result}")
+                        #logger.info(f"simple_api StarRail_board api_result : {api_result}")
                         if api_result.login_expired:
                             logger.info(
                                 f"崩铁实时便笺: 用户 {account.bbs_uid} 登录失效")
@@ -1568,3 +1570,4 @@ async def StarRail_board(account: UserAccount) -> Tuple[
                     return StarRailBoardStatus(network_error=True), None
     if flag:
         return StarRailBoardStatus(no_starrail_account=True), None
+

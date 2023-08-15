@@ -6,9 +6,9 @@ import random
 import threading
 from typing import Union
 
-from nonebot import on_command, get_adapters
+from nonebot import on_command, get_adapters, get_bot
 from nonebot.adapters.onebot.v11 import MessageSegment as OneBotV11MessageSegment, Adapter as OneBotV11Adapter, \
-    MessageEvent as OneBotV11MessageEvent
+    MessageEvent as OneBotV11MessageEvent, Bot
 from nonebot.adapters.qqguild import MessageSegment as QQGuildMessageSegment, Adapter as QQGuildAdapter, \
     MessageEvent as QQGuildMessageEvent
 from nonebot.adapters.qqguild.exception import AuditException
@@ -52,11 +52,12 @@ async def _(event: Union[GeneralMessageEvent], matcher: Matcher):
     """
     手动米游币任务函数
     """
+    bot = get_bot(str(event.self_id))
     user = _conf.users.get(event.get_user_id())
     if not user or not user.accounts:
         await manually_game_sign.finish(f"⚠️你尚未绑定米游社账户，请先使用『{COMMAND_BEGIN}登录』进行登录")
     await manually_game_sign.send("⏳开始执行米游币任务...")
-    await perform_bbs_sign(user_id=event.get_user_id(), matcher=matcher)
+    await perform_bbs_sign(bot=bot, user_id=event.get_user_id(), matcher=matcher)
 
 
 manually_resin_check = on_command(
@@ -101,10 +102,11 @@ manually_resin_check_sr = on_command(
 )
 manually_resin_check_sr.name = '星穹铁道便笺'
 manually_resin_check_sr.usage = '手动查看星穹铁道实时便笺，即开拓力、每日实训、每周模拟宇宙积分等信息'
+has_checked_sr = {}
 for user in _conf.users.values():
     for account in user.accounts.values():
         if account.enable_resin:
-            has_checked[account.bbs_uid] = has_checked.get(account.bbs_uid,
+            has_checked_sr[account.bbs_uid] = has_checked_sr.get(account.bbs_uid,
                                                            {"stamina": False, "train_score": False,
                                                             "rogue_score": False})
 
@@ -247,7 +249,7 @@ async def perform_game_sign(user_id: str, matcher: Matcher = None, event: Union[
         write_plugin_data()
 
 
-async def perform_bbs_sign(user_id: str, matcher: Matcher = None):
+async def perform_bbs_sign(bot: Bot, user_id: str, matcher: Matcher = None):
     """
     执行米游币任务函数，并发送给用户任务执行消息。
 
@@ -336,7 +338,7 @@ async def perform_bbs_sign(user_id: str, matcher: Matcher = None):
                 if matcher:
                     await matcher.send(msg)
                 else:
-                    await send_private_msg(user_id=user_id, message=msg)
+                    await bot.send_private_msg(user_id=user_id, message=msg)
 
     # 如果全部登录失效，则关闭通知
     if len(failed_accounts) == len(user.accounts):
@@ -344,7 +346,7 @@ async def perform_bbs_sign(user_id: str, matcher: Matcher = None):
         write_plugin_data()
 
 
-async def resin_check(user_id: str, matcher: Matcher = None):
+async def resin_check(bot: Bot, user_id: str, matcher: Matcher = None):
     """
     查看原神实时便笺函数，并发送给用户任务执行消息。
 
@@ -374,7 +376,7 @@ async def resin_check(user_id: str, matcher: Matcher = None):
                 continue
             if genshin_board_status.need_verify:
                 if matcher:
-                    await matcher.send('⚠️遇到验证码正在尝试绕过')
+                    await matcher.send(f'⚠️遇到验证码正在尝试绕过')
             msg = ''
             # 手动查询体力时，无需判断是否溢出
             if not matcher:
@@ -423,23 +425,23 @@ async def resin_check(user_id: str, matcher: Matcher = None):
                 await matcher.send(msg)
             else:
                 if board.current_resin >= account.user_resin_threshold:
-                    await send_private_msg(user_id=user_id, message=msg)
+                    await bot.send_private_msg(user_id=user_id, message=msg)
                 else:
                     logger.info(f"原神实时便笺：账户 {account.bbs_uid} 树脂:{board.current_resin},未满足推送条件")
 
 
-async def resin_check_sr(user_id: str, matcher: Matcher = None):
+async def resin_check_sr(bot: Bot, user_id: str, matcher: Matcher = None):
     """
     查看星铁实时便笺函数，并发送给用户任务执行消息。
 
     :param user_id: 用户QQ号
     :param matcher: 事件响应器
     """
-    global has_checked
+    global has_checked_sr
     user = _conf.users[user_id]
     for account in user.accounts.values():
         if account.enable_resin:
-            has_checked[account.bbs_uid] = has_checked.get(account.bbs_uid,
+            has_checked_sr[account.bbs_uid] = has_checked_sr.get(account.bbs_uid,
                                                            {"stamina": False, "train_score": False,
                                                             "rogue_score": False})
         if account.enable_resin or matcher:
@@ -459,41 +461,30 @@ async def resin_check_sr(user_id: str, matcher: Matcher = None):
                 continue
             if starrail_board_status.need_verify:
                 if matcher:
-                    await matcher.send('⚠️遇到验证码正在尝试绕过')
+                    await matcher.send(f'⚠️遇到验证码正在尝试绕过')
             msg = ''
             # 手动查询体力时，无需判断是否溢出
             if not matcher:
                 # 体力溢出提醒
                 if board.current_stamina == 180:
                     # 防止重复提醒
-                    if has_checked[account.bbs_uid]['stamina']:
+                    if has_checked_sr[account.bbs_uid]['stamina']:
                         return
                     else:
-                        has_checked[account.bbs_uid]['stamina'] = True
+                        has_checked_sr[account.bbs_uid]['stamina'] = True
                         msg += '❕您的开拓力已经满啦\n'
                 else:
-                    has_checked[account.bbs_uid]['stamina'] = False
+                    has_checked_sr[account.bbs_uid]['stamina'] = False
                 # 每日实训状态提醒
                 if board.current_train_score == board.max_train_score:
                     # 防止重复提醒
-                    if has_checked[account.bbs_uid]['train_score']:
+                    if has_checked_sr[account.bbs_uid]['train_score']:
                         return
                     else:
-                        has_checked[account.bbs_uid]['train_score'] = True
+                        has_checked_sr[account.bbs_uid]['train_score'] = True
                         msg += '❕您的每日实训已完成\n'
                 else:
-                    has_checked[account.bbs_uid]['train_score'] = False
-                # 每周模拟宇宙积分提醒
-                if board.current_rogue_score == board.max_rogue_score:
-                    # 防止重复提醒
-                    if has_checked[account.bbs_uid]['rogue_score']:
-                        return
-                    else:
-                        has_checked[account.bbs_uid]['rogue_score'] = True
-                        msg += '❕您的模拟宇宙积分已经打满了\n\n'
-                else:
-                    has_checked[account.bbs_uid]['rogue_score'] = False
-                    return
+                    has_checked_sr[account.bbs_uid]['train_score'] = False
             msg += "❖星穹铁道实时便笺❖" \
                    f"\n⏳开拓力数量：{board.current_stamina} / 180" \
                    f"\n⏱开拓力{board.stamina_recover_text}" \
@@ -505,7 +496,7 @@ async def resin_check_sr(user_id: str, matcher: Matcher = None):
                 await matcher.send(msg)
             else:
                 if board.current_stamina >= account.user_stamina_threshold:
-                    await send_private_msg(user_id=user_id, message=msg)
+                    await bot.send_private_msg(user_id=user_id, message=msg)
                 else:
                     logger.info(f"崩铁实时便笺：账户 {account.bbs_uid} 开拓力:{board.current_stamina},未满足推送条件")
 
@@ -530,10 +521,11 @@ async def daily_schedule():
     # 随机延迟
     await asyncio.sleep(random.randint(0, 59))
     logger.info(f"{_conf.preference.log_head}开始执行每日自动任务")
+    bot = get_bot()
     for qq in _conf.users:
-        await perform_bbs_sign(user_id=qq)
+        await perform_bbs_sign(bot=bot, user_id=qq)
         await perform_game_sign(user_id=qq)
-        await api_rrjf(user_id=qq)
+        await api_rrjf(bot=bot, user_id=qq)
     logger.info(f"{_conf.preference.log_head}每日自动任务执行完成")
 
 
@@ -544,9 +536,10 @@ async def auto_resin_check():
     """
     自动查看实时便笺
     """
+    bot = get_bot()
     for qq in _conf.users:
-        await resin_check(user_id=qq)
-        await resin_check_sr(user_id=qq)
+        await resin_check(bot=bot, user_id=qq)
+        await resin_check_sr(bot=bot, user_id=qq)
 
 #—————————————————————————————————————————————————————————————————————————————#
 from pydantic import BaseModel
@@ -570,10 +563,10 @@ async def key_rrjf(event: GeneralMessageEvent, matcher: Matcher):
     :param integral:api返回内容中的积分位置
     """
     # user = _conf.users.get(event.user_id)
-    await api_rrjf(user_id=event.get_user_id(), matcher=matcher)
+    await api_rrjf(bot=Bot, user_id=event.get_user_id(), matcher=matcher)
 
 
-async def api_rrjf(user_id: str, matcher: Matcher = None):
+async def api_rrjf(bot: Bot, user_id: str, matcher: Matcher = None):
     params_part = _conf.preference.geetest_url.split('?')[1]
     key_value_pairs = params_part.split('&')
     appkey = None
@@ -597,8 +590,9 @@ async def api_rrjf(user_id: str, matcher: Matcher = None):
                 if matcher:
                     await matcher.send(msg)
                 else:
-                    await send_private_msg(user_id=user_id, message=msg)
+                    await bot.send_private_msg(user_id=user_id, message=msg)
             else:
                 print("错误:", response.status_code)
     except httpx.RequestError as e:
         print("发生错误:", str(e))
+

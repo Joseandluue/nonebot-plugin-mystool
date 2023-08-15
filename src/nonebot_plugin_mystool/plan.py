@@ -85,10 +85,11 @@ async def _(event: Union[GeneralMessageEvent], matcher: Matcher):
     """
     手动查看原神便笺
     """
+    bot = get_bot(str(event.self_id))
     user = _conf.users.get(event.get_user_id())
     if not user or not user.accounts:
         await manually_game_sign.finish(f"⚠️你尚未绑定米游社账户，请先使用『{COMMAND_BEGIN}登录』进行登录")
-    await resin_check(user_id=event.get_user_id(), matcher=matcher)
+    await resin_check(bot=bot, user_id=event.get_user_id(), matcher=matcher)
 
 
 manually_resin_check_sr = on_command(
@@ -116,10 +117,11 @@ async def _(event: Union[GeneralMessageEvent], matcher: Matcher):
     """
     手动查看星穹铁道便笺（sr）
     """
+    bot = get_bot(str(event.self_id))
     user = _conf.users.get(event.get_user_id())
     if not user or not user.accounts:
         await manually_game_sign.finish(f"⚠️你尚未绑定米游社账户，请先使用『{COMMAND_BEGIN}登录』进行登录")
-    await resin_check_sr(user_id=event.get_user_id(), matcher=matcher)
+    await resin_check_sr(bot=bot, user_id=event.get_user_id(), matcher=matcher)
 
 
 async def perform_game_sign(user_id: str, matcher: Matcher = None, event: Union[GeneralMessageEvent] = None):
@@ -556,7 +558,7 @@ manually_rrjf.name = '积分'
 manually_rrjf.usage = '手动查看打码平台的积分信息'
 
 @manually_rrjf.handle()
-async def key_rrjf(event: GeneralMessageEvent, matcher: Matcher):
+async def key_rrjf(event: Union[GeneralMessageEvent], matcher: Matcher):
     """
     手动查询打码积分函数
     :param url:api_link

@@ -1,14 +1,20 @@
-```
- __    __     __  __     ______     ______   ______     ______     __
-/\ "-./  \   /\ \_\ \   /\  ___\   /\__  _\ /\  __ \   /\  __ \   /\ \
-\ \ \-./\ \  \ \____ \  \ \___  \  \/_/\ \/ \ \ \/\ \  \ \ \/\ \  \ \ \____
- \ \_\ \ \_\  \/\_____\  \/\_____\    \ \_\  \ \_____\  \ \_____\  \ \_____\
-  \/_/  \/_/   \/_____/   \/_____/     \/_/   \/_____/   \/_____/   \/_____/
-```
+基于[Ljzd-PRO/nonebot-plugin-mystool](https://github.com/Ljzd-PRO/nonebot-plugin-mystool)/v1.2.3修改:
 
-[![CodeFactor](https://www.codefactor.io/repository/github/ljzd-pro/nonebot-plugin-mystool/badge?style=for-the-badge)](https://www.codefactor.io/repository/github/ljzd-pro/nonebot-plugin-mystool)
-[![最新发行版](https://img.shields.io/github/v/release/Ljzd-PRO/nonebot-plugin-mysTool?logo=python&style=for-the-badge)](https://github.com/Ljzd-PRO/nonebot-plugin-mystool/releases/latest)
-[![最后提交](https://img.shields.io/github/last-commit/Ljzd-PRO/nonebot-plugin-mysTool/dev?style=for-the-badge)](https://github.com/Ljzd-PRO/nonebot-plugin-mystool/commits/dev)
+add：
+```
+rrocr积分查询 
+```
+modify：
+```
+打码返回内容的获取对象 
+```
+  > 修改的签到代码 from @Night-stars-1 [mystool](https://github.com/Night-stars-1/nonebot-plugin-mystool)
+
+fix：
+```
+v1.5经测试便笺自动检查推送相关有问题，当matcher='None'时，无法触发推送
+    1.7中便笺和米游币自动推送改为Ljzd-PRO/nonebot-plugin-mystoo/v1.01版本使用的BOT模块
+```
 
 # mysTool - 米游社辅助工具插件
 

@@ -15,6 +15,11 @@ fix：
 v1.5经测试便笺自动检查推送相关有问题，当matcher='None'时，无法触发推送
     1.7中便笺和米游币自动推送改为Ljzd-PRO/nonebot-plugin-mystoo/v1.01版本使用的BOT模块
 ```
+issues
+```
+米游币：
+      （自动检查）不使用bot：当签到没有返回正确内容[point]，则没有触发推送
+```
 
 # mysTool - 米游社辅助工具插件
 

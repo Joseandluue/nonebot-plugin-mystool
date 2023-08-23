@@ -235,19 +235,21 @@ async def get_validate(gt: str = None, challenge: str = None, retry: bool = True
     for key, value in content.items():
         if isinstance(value, str):
             content[key] = value.format(gt=gt, challenge=challenge)
+    #logger.info(f"打码信息模板:{content}")
 
     if gt and challenge and _conf.preference.geetest_url:
         try:
+            url_with_geetest_url = f"{_conf.preference.geetest_url}&referer=https://webstatic.mihoyo.com/&gt={gt}&challenge={challenge}"
             async for attempt in get_async_retry(retry):
                 with attempt:
                     async with httpx.AsyncClient() as client:
                         res = await client.post(
-                            _conf.preference.geetest_url,
+                            url_with_geetest_url,
                             timeout=60,
                             json=content)
                     geetest_data = res.json()
                     logger.info(f"打码:{geetest_data}")
-                    if geetest_data['data']['result'] != 'fail':
+                    if geetest_data['data']['validate'] != None:
                         return GeetestResult(validate=geetest_data['data']['validate'], seccode="")
         except tenacity.RetryError:
             logger.exception(f"{_conf.preference.log_head}获取人机验证validate失败")

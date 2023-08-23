@@ -189,6 +189,7 @@ class BaseGameSign:
                         )
 
                     api_result = ApiResultHandler(res.json())
+                    #logger.debug(f'签到返回结果：{api_result}')
                     if api_result.login_expired:
                         logger.info(
                             f"游戏签到 - 用户 {self.account.bbs_uid} 登录失效")
@@ -205,22 +206,21 @@ class BaseGameSign:
                         logger.debug(f"{_conf.preference.log_head}网络请求返回: {res.text}")
                         gt = api_result.data.get("gt", None)
                         challenge = api_result.data.get("challenge", None)
+                        #logger.debug(f'遇到验证获取gt/challenge：{gt}/{challenge}')
                         if gt and challenge:
                             geetest_result = await get_validate(gt, challenge)
                             if _conf.preference.geetest_url:
-                                if on_geetest_callback and attempt.retry_state.attempt_number == 1:
-                                    if isinstance(on_geetest_callback, Coroutine):
-                                        await on_geetest_callback
-                                    else:
-                                        on_geetest_callback()
-                                continue
+                                #if attempt.retry_state.attempt_number == 1:
+                                raise MystoolException("遇到验证码")
                             else:
                                 return BaseApiStatus(need_verify=True)
-                    else:
-                        logger.success(f"游戏签到 - 用户 {self.account.bbs_uid} 签到成功")
-                        logger.debug(f"网络请求返回: {res.text}")
-                        return BaseApiStatus(success=True)
-
+            if geetest_result.validate:
+                return BaseApiStatus(success=True, need_verify=True)
+            else:
+                return BaseApiStatus(success=True)
+            
+        except MystoolException:
+            return BaseApiStatus(need_verify=True)
         except tenacity.RetryError as e:
             if is_incorrect_return(e):
                 logger.exception(f"游戏签到 - 服务器没有正确返回")
@@ -232,6 +232,13 @@ class BaseGameSign:
             else:
                 logger.exception(f"游戏签到 - 请求失败")
                 return BaseApiStatus(network_error=True)
+
+class MystoolException(Exception):
+    """Base genshinhelper exception."""
+
+    def __init__(self, message):
+        super().__init__(message)
+        logger.error(message)
 
 
 class GenshinImpactSign(BaseGameSign):

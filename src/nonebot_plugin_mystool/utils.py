@@ -246,6 +246,7 @@ async def get_validate(gt: str = None, challenge: str = None, retry: bool = True
                             timeout=60,
                             json=content)
                     geetest_data = res.json()
+                    logger.info(f"打码:{geetest_data}")
                     if geetest_data['data']['result'] != 'fail':
                         return GeetestResult(validate=geetest_data['data']['validate'], seccode="")
         except tenacity.RetryError:

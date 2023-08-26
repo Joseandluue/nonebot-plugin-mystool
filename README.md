@@ -6,9 +6,9 @@ rrocr积分查询
 ```
 modify：
 ```
-打码返回内容的获取对象 
+
 ```
-  > 修改的签到代码 from @Night-stars-1 [mystool](https://github.com/Night-stars-1/nonebot-plugin-mystool/blob/a4208a3d962d7e51d609fd04f2196dd032a81a88/src/nonebot_plugin_mystool/game_sign_api.py#L212-L236)
+
 
 fix：
 ```

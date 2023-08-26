@@ -4,6 +4,7 @@
 import asyncio
 import threading
 from typing import Union, Optional, Type, Iterable, Dict
+from datetime import datetime, time
 
 from nonebot import on_command, get_adapters
 from nonebot.adapters.onebot.v11 import MessageSegment as OneBotV11MessageSegment, Adapter as OneBotV11Adapter, \
@@ -24,7 +25,7 @@ from .plugin_data import PluginDataManager, write_plugin_data
 from .simple_api import genshin_note, get_game_record, starrail_note
 from .user_data import UserData
 from .utils import get_file, logger, COMMAND_BEGIN, GeneralMessageEvent, send_private_msg, get_all_bind, \
-    get_unique_users
+    get_unique_users, get_validate
 
 _conf = PluginDataManager.plugin_data
 
@@ -204,14 +205,13 @@ async def perform_game_sign(
 
             # 若没签到，则进行签到功能；若获取今日签到情况失败，仍可继续
             if (get_info_status and not info.is_sign) or not get_info_status:
-                if matcher:
-                    sign_status = await signer.sign(
-                        account.platform,
-                        matcher.send("⏳正在尝试完成人机验证，请稍后...")
-                    )
-                else:
-                    sign_status = await signer.sign(account.platform)
-                #logger.debug(f'sign_status:{sign_status}')
+                sign_status, mmt_data = await signer.sign(account.platform)
+                if sign_status.need_verify:
+                    if _conf.preference.geetest_url:
+                        if matcher:
+                            await matcher.send("⏳正在尝试完成人机验证，请稍后...")
+                        geetest_result = await get_validate(mmt_data.gt, mmt_data.challenge)
+                        sign_status, _ = await signer.sign(account.platform, mmt_data, geetest_result)
                 if not sign_status and (user.enable_notice or matcher):
                     if sign_status.login_expired:
                         message = f"⚠️账户 {account.bbs_uid} 🎮『{signer.NAME}』签到时服务器返回登录失效，请尝试重新登录绑定账户"
@@ -534,6 +534,8 @@ async def starrail_note_check(user: UserData, user_ids: Iterable[str], matcher: 
             # 手动查询体力时，无需判断是否溢出
             if not matcher:
                 do_notice = False
+                starrail_notice.current_train_score= False
+
                 """记录是否需要提醒"""
                 # 体力溢出提醒
                 if note.current_stamina >= account.user_stamina_threshold:
@@ -553,21 +555,23 @@ async def starrail_note_check(user: UserData, user_ids: Iterable[str], matcher: 
                     starrail_notice.current_stamina_full = False
 
                 # 每日实训状态提醒
-                if note.current_train_score == note.max_train_score:
+                if note.current_train_score != note.max_train_score \
+                        and _conf.preference.alerted_time_bool  :
                     # 防止重复提醒
                     if not starrail_notice.current_train_score:
                         starrail_notice.current_train_score = True
-                        msg += '❕您的每日实训已完成\n'
+                        msg += '❕您的每日实训未完成\n'
                         do_notice = True
                 else:
                     starrail_notice.current_train_score = False
 
                 # 每周模拟宇宙积分提醒
-                if note.current_rogue_score == note.max_rogue_score:
+                if note.current_rogue_score != note.max_rogue_score \
+                        and _conf.preference.alerted_time_bool  :
                     # 防止重复提醒
                     if not starrail_notice.current_rogue_score:
                         starrail_notice.current_rogue_score = True
-                        msg += '❕您的模拟宇宙积分已经打满了\n\n'
+                        msg += '❕您的模拟宇宙积分还没打满\n\n'
                         do_notice = True
                 else:
                     starrail_notice.current_rogue_score = False

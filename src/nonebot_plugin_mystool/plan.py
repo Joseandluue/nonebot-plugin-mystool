@@ -4,6 +4,7 @@
 import asyncio
 import threading
 from typing import Union, Optional, Type, Iterable, Dict
+from datetime import datetime, time
 
 from nonebot import on_command, get_adapters
 from nonebot.adapters.onebot.v11 import MessageSegment as OneBotV11MessageSegment, Adapter as OneBotV11Adapter, \
@@ -553,7 +554,8 @@ async def starrail_note_check(user: UserData, user_ids: Iterable[str], matcher: 
                     starrail_notice.current_stamina_full = False
 
                 # 每日实训状态提醒
-                if note.current_train_score != note.max_train_score:
+                if note.current_train_score != note.max_train_score \
+                        and _conf.preference.alerted_time_bool  :
                     # 防止重复提醒
                     if not starrail_notice.current_train_score:
                         starrail_notice.current_train_score = True
@@ -563,7 +565,8 @@ async def starrail_note_check(user: UserData, user_ids: Iterable[str], matcher: 
                     starrail_notice.current_train_score = False
 
                 # 每周模拟宇宙积分提醒
-                if note.current_rogue_score != note.max_rogue_score:
+                if note.current_rogue_score != note.max_rogue_score \
+                        and _conf.preference.alerted_time_bool  :
                     # 防止重复提醒
                     if not starrail_notice.current_rogue_score:
                         starrail_notice.current_rogue_score = True

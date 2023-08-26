@@ -186,6 +186,7 @@ class BaseGameSign:
                         )
 
                     api_result = ApiResultHandler(res.json())
+                    #logger.debug(f'签到返回结果：{api_result}')
                     if api_result.login_expired:
                         logger.info(
                             f"游戏签到 - 用户 {self.account.bbs_uid} 登录失效")
@@ -214,6 +215,13 @@ class BaseGameSign:
             else:
                 logger.exception(f"游戏签到 - 请求失败")
                 return BaseApiStatus(network_error=True), None
+
+class MystoolException(Exception):
+    """Base genshinhelper exception."""
+
+    def __init__(self, message):
+        super().__init__(message)
+        logger.error(message)
 
 
 class GenshinImpactSign(BaseGameSign):

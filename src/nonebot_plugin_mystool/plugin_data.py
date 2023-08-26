@@ -3,7 +3,7 @@
 """
 import json
 import os
-from datetime import time, timedelta
+from datetime import time, timedelta, datetime
 from json import JSONDecodeError
 from pathlib import Path
 from typing import Union, Optional, Tuple, Any, Dict, TYPE_CHECKING, AbstractSet, \
@@ -87,6 +87,8 @@ class Preference(BaseSettings, extra=Extra.ignore):
     '''每日自动签到和米游社任务的定时任务执行时间，格式为HH:MM'''
     resin_interval: int = 60
     '''每次检查原神便笺间隔，单位为分钟'''
+    alerted_time: str = "18:00"
+    '''崩铁便笺的每日实训开始提醒时间，格式为HH:MM'''
     geetest_url: Optional[str]
     '''极验Geetest人机验证打码接口URL'''
     geetest_params: Optional[Dict[str, Any]] = None
@@ -119,6 +121,13 @@ class Preference(BaseSettings, extra=Extra.ignore):
         elif not os.access(absolute_path, os.W_OK):
             logger.warning(f"程序没有写入日志文件 {absolute_path} 的权限")
         return v
+    
+    @property
+    def alerted_time_bool(self) -> bool:
+        now = datetime.now().time()
+        notice_hour, notice_minute = map(int, self.alerted_time.split(":"))
+        alerted_time = time(notice_hour, notice_minute)
+        return now >= alerted_time
 
 
 class GoodListImageConfig(BaseModel):

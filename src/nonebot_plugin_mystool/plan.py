@@ -532,6 +532,8 @@ async def starrail_note_check(user: UserData, user_ids: Iterable[str], matcher: 
             # 手动查询体力时，无需判断是否溢出
             if not matcher:
                 do_notice = False
+                starrail_notice.current_train_score= False
+
                 """记录是否需要提醒"""
                 # 体力溢出提醒
                 if note.current_stamina >= account.user_stamina_threshold:
@@ -551,21 +553,21 @@ async def starrail_note_check(user: UserData, user_ids: Iterable[str], matcher: 
                     starrail_notice.current_stamina_full = False
 
                 # 每日实训状态提醒
-                if note.current_train_score == note.max_train_score:
+                if note.current_train_score != note.max_train_score:
                     # 防止重复提醒
                     if not starrail_notice.current_train_score:
                         starrail_notice.current_train_score = True
-                        msg += '❕您的每日实训已完成\n'
+                        msg += '❕您的每日实训未完成\n'
                         do_notice = True
                 else:
                     starrail_notice.current_train_score = False
 
                 # 每周模拟宇宙积分提醒
-                if note.current_rogue_score == note.max_rogue_score:
+                if note.current_rogue_score != note.max_rogue_score:
                     # 防止重复提醒
                     if not starrail_notice.current_rogue_score:
                         starrail_notice.current_rogue_score = True
-                        msg += '❕您的模拟宇宙积分已经打满了\n\n'
+                        msg += '❕您的模拟宇宙积分还没打满\n\n'
                         do_notice = True
                 else:
                     starrail_notice.current_rogue_score = False

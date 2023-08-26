@@ -3,7 +3,7 @@
 """
 import json
 import os
-from datetime import time, timedelta
+from datetime import time, timedelta, datetime
 from json import JSONDecodeError
 from pathlib import Path
 from typing import Union, Optional, Tuple, Any, Dict, TYPE_CHECKING, AbstractSet, \
@@ -15,7 +15,7 @@ from pydantic import BaseModel, ValidationError, BaseSettings, validator, Extra
 from . import user_data
 from .user_data import UserData, UserAccount
 
-VERSION = "v1.3.0"
+VERSION = "v1.3.1-dev"
 """程序当前版本"""
 
 ROOT_PATH = Path(__name__).parent.absolute()
@@ -87,8 +87,12 @@ class Preference(BaseSettings, extra=Extra.ignore):
     '''每日自动签到和米游社任务的定时任务执行时间，格式为HH:MM'''
     resin_interval: int = 60
     '''每次检查原神便笺间隔，单位为分钟'''
+    alerted_time: str = "18:00"
+    '''崩铁便笺的每日实训开始提醒时间，格式为HH:MM'''
     geetest_url: Optional[str]
     '''极验Geetest人机验证打码接口URL'''
+    geetest_params: Optional[Dict[str, Any]] = None
+    '''极验Geetest人机验证打码API发送的参数（除gt，challenge外）'''
     geetest_json: Optional[Dict[str, Any]] = {
         "gt": "{gt}",
         "challenge": "{challenge}"
@@ -96,6 +100,14 @@ class Preference(BaseSettings, extra=Extra.ignore):
     '''极验Geetest人机验证打码API发送的JSON数据 `{gt}`, `{challenge}` 为占位符'''
     override_device_and_salt: bool = False
     """是否读取插件数据文件中的 device_config 设备配置 和 salt_config 配置而不是默认配置（一般情况不建议开启）"""
+    enable_blacklist: bool = False
+    """是否启用用户黑名单"""
+    blacklist_path: Optional[Path] = DATA_PATH / "blacklist.txt"
+    """用户黑名单文件路径"""
+    enable_whitelist: bool = False
+    """是否启用用户白名单"""
+    whitelist_path: Optional[Path] = DATA_PATH / "whitelist.txt"
+    """用户白名单文件路径"""
 
     @validator("log_path", allow_reuse=True)
     def _(cls, v: Optional[Path]):
@@ -109,6 +121,13 @@ class Preference(BaseSettings, extra=Extra.ignore):
         elif not os.access(absolute_path, os.W_OK):
             logger.warning(f"程序没有写入日志文件 {absolute_path} 的权限")
         return v
+    
+    @property
+    def alerted_time_bool(self) -> bool:
+        now = datetime.now().time()
+        notice_hour, notice_minute = map(int, self.alerted_time.split(":"))
+        alerted_time = time(notice_hour, notice_minute)
+        return now >= alerted_time
 
 
 class GoodListImageConfig(BaseModel):

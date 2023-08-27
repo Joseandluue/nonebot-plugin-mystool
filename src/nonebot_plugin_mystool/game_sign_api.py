@@ -153,6 +153,7 @@ class BaseGameSign:
         headers = HEADERS_API_TAKUMI_MOBILE.copy()
         if platform == "ios":
             headers["x-rpc-device_id"] = self.account.device_id_ios
+            headers["DS"] = generate_ds(data=content)
             headers["Sec-Fetch-Dest"] = "empty"
             headers["Sec-Fetch-Site"] = "same-site"
         else:
@@ -166,6 +167,7 @@ class BaseGameSign:
             headers.pop("x-rpc-platform")
             await device_login(self.account)
             await device_save(self.account)
+            headers["DS"] = generate_ds(data=content)
 
         try:
             async for attempt in get_async_retry(retry):

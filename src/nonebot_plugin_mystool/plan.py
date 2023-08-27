@@ -617,7 +617,7 @@ async def daily_schedule():
         user_ids = [user_id] + list(get_all_bind(user_id))
         await perform_bbs_sign(user=user, user_ids=user_ids)
         await perform_game_sign(user=user, user_ids=user_ids)
-        await api_rrjf(user=user, user_ids=user_ids)
+        await api_rrjf(user_ids=user_ids)
     logger.info(f"{_conf.preference.log_head}每日自动任务执行完成")
 
 

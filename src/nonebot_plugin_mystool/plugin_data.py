@@ -87,7 +87,7 @@ class Preference(BaseSettings, extra=Extra.ignore):
     '''每日自动签到和米游社任务的定时任务执行时间，格式为HH:MM'''
     resin_interval: int = 60
     '''每次检查原神便笺间隔，单位为分钟'''
-    alerted_time: str = "18:00"
+    alerted_time: str = "00:10"
     '''崩铁便笺的每日实训开始提醒时间，格式为HH:MM'''
     geetest_url: Optional[str]
     '''极验Geetest人机验证打码接口URL'''
@@ -127,7 +127,13 @@ class Preference(BaseSettings, extra=Extra.ignore):
         now = datetime.now().time()
         notice_hour, notice_minute = map(int, self.alerted_time.split(":"))
         alerted_time = time(notice_hour, notice_minute)
-        return now >= alerted_time
+        if alerted_time >= "00:00" and alerted_time < "03:59" :
+            if now >= alerted_time:
+                return True
+        elif alerted_time >= "04:00":
+            if now >= alerted_time or now >= "00:00" and now < "03:59" :
+                return True
+
 
 
 class GoodListImageConfig(BaseModel):

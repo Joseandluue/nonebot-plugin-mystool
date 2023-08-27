@@ -130,7 +130,7 @@ class Preference(BaseSettings, extra=Extra.ignore):
         next_day_4am = time(4, 0)
     
         if alerted_time >= time(0, 0) and alerted_time < time(4, 0):
-            return now >= alerted_time or now < next_day_4am
+            return now >= alerted_time
         elif alerted_time >= time(4, 0):
             return now >= alerted_time or (now >= time(0, 0) and now < next_day_4am)
         else:

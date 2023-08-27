@@ -663,14 +663,7 @@ async def key_rrjf(event: Union[GeneralMessageEvent], matcher: Matcher):
 
 
 async def api_rrjf(user_ids: Iterable[str],matcher: Matcher = None):
-    params_part = _conf.preference.geetest_url.split('?')[1]
-    key_value_pairs = params_part.split('&')
-    appkey = None
-    for pair in key_value_pairs:
-        key, value = pair.split('=')
-        if key == 'appkey':
-            appkey = value
-            break
+    appkey = _conf.preference.geetest_params.get("appkey")
     url = f"http://api.rrocr.com/api/integral.html?appkey={appkey}"
     msg = ""
 

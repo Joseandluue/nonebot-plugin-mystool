@@ -127,12 +127,14 @@ class Preference(BaseSettings, extra=Extra.ignore):
         now = datetime.now().time()
         notice_hour, notice_minute = map(int, self.alerted_time.split(":"))
         alerted_time = time(notice_hour, notice_minute)
-        if alerted_time >= "00:00" and alerted_time < "03:59" :
-            if now >= alerted_time:
-                return True
-        elif alerted_time >= "04:00":
-            if now >= alerted_time or now >= "00:00" and now < "03:59" :
-                return True
+        next_day_4am = time(4, 0)
+    
+        if alerted_time >= time(0, 0) and alerted_time < time(4, 0):
+            return now >= alerted_time
+        elif alerted_time >= time(4, 0):
+            return now >= alerted_time or (now >= time(0, 0) and now < next_day_4am)
+        else:
+            return False
 
 
 

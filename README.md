@@ -13,6 +13,15 @@
 # mysTool - 米游社辅助工具插件
 
 ## 📣 更新内容
+### 2023.8.30 - v1.3.1
+- 登录功能增加黑名单/白名单功能 #178
+  > [插件偏好设置 - enable_blacklist](https://github.com/Ljzd-PRO/nonebot-plugin-mystool/wiki/Configuration-Preference#enable_blacklist)
+- 登录功能支持使用第三方打码平台进行人机验证（暂不支持GT4）
+- 修复游戏签到人机验证无效的问题 #163
+- 便笺体力除了达到阈值以外，体力已满也会提醒 #163
+- 增加 `geetest_params`，用于填写人机验证打码平台API需要传入的URL参数 by @Joseandluue
+  > [插件偏好设置 - geetest_params](https://github.com/Ljzd-PRO/nonebot-plugin-mystool/wiki/Configuration-Preference#geetest_params)
+
 ### 2023.8.21 - v1.3.0
 - 修复米游币任务中**讨论区签到失败**的问题 #173
 - **讨论区签到**增加通过打码平台自动完成**人机验证**的支持 #157
@@ -38,7 +47,7 @@
   > 说明文档：[🔗对绑定的某个米哈游账户进行设置](https://github.com/Ljzd-PRO/nonebot-plugin-mystool/wiki/Information-Setting#%E5%AF%B9%E7%BB%91%E5%AE%9A%E7%9A%84%E6%9F%90%E4%B8%AA%E7%B1%B3%E5%93%88%E6%B8%B8%E8%B4%A6%E6%88%B7%E8%BF%9B%E8%A1%8C%E8%AE%BE%E7%BD%AE)
 - 修复 `preference.override_device_and_salt` 关闭无效的问题
 
-## 功能和特性
+## ⚡ 功能和特性
 
 - 支持QQ聊天和QQ频道
 - 短信验证登录，免抓包获取 Cookie
@@ -48,9 +57,10 @@
 - 可支持多个 QQ 账号，每个 QQ 账号可绑定多个米哈游账户
 - QQ 推送执行结果通知
 - 原神、崩坏：星穹铁道状态便笺通知
-- 可为每日米游币任务、游戏签到配置人机验证打码平台
+- 可为登录、每日米游币任务、游戏签到配置人机验证打码平台
+- 可配置用户黑名单/白名单
 
-## 使用说明
+## 📖 使用说明
 
 ### 🛠️ NoneBot2 机器人部署和插件安装
 
@@ -77,7 +87,10 @@
   <img src="https://contrib.rocks/image?repo=Ljzd-PRO/nonebot-plugin-mystool&max=1000" alt="贡献者"/>
 </a>
 
-### 源码说明
+### 🔨 开发版分支
+[**🔨dev**](https://github.com/Ljzd-PRO/nonebot-plugin-mystool/tree/dev)
+
+### 📃 源码说明
 [📃Source-Structure](https://github.com/Ljzd-PRO/nonebot-plugin-mystool/wiki/Source-Structure)
 
 ### 适配 [绪山真寻Bot](https://github.com/HibiKier/zhenxun_bot) 的分支

@@ -153,6 +153,7 @@ class BaseGameSign:
         headers = HEADERS_API_TAKUMI_MOBILE.copy()
         if platform == "ios":
             headers["x-rpc-device_id"] = self.account.device_id_ios
+            headers["DS"] = generate_ds(data=content)
             headers["Sec-Fetch-Dest"] = "empty"
             headers["Sec-Fetch-Site"] = "same-site"
             headers["DS"] = generate_ds()
@@ -188,6 +189,7 @@ class BaseGameSign:
                         )
 
                     api_result = ApiResultHandler(res.json())
+                    #logger.debug(f'签到返回结果：{api_result}')
                     if api_result.login_expired:
                         logger.info(
                             f"游戏签到 - 用户 {self.account.bbs_uid} 登录失效")
@@ -216,6 +218,13 @@ class BaseGameSign:
             else:
                 logger.exception(f"游戏签到 - 请求失败")
                 return BaseApiStatus(network_error=True), None
+
+class MystoolException(Exception):
+    """Base genshinhelper exception."""
+
+    def __init__(self, message):
+        super().__init__(message)
+        logger.error(message)
 
 
 class GenshinImpactSign(BaseGameSign):

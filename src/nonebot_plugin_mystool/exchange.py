@@ -16,7 +16,7 @@ from typing import List, Callable, Any, Tuple, Optional, Dict, Union
 from apscheduler.events import JobExecutionEvent, EVENT_JOB_EXECUTED
 from nonebot import on_command, get_driver
 from nonebot.adapters.onebot.v11 import MessageEvent as OneBotV11MessageEvent, MessageSegment as OneBotV11MessageSegment
-from nonebot.adapters.qqguild import MessageEvent as QQGuildMessageEvent, MessageSegment as QQGuildMessageSegment
+from nonebot.adapters.qq import MessageEvent as QQGuildMessageEvent, MessageSegment as QQGuildMessageSegment
 from nonebot.internal.params import ArgStr
 from nonebot.matcher import Matcher
 from nonebot.params import ArgPlainText, T_State, CommandArg, Command
@@ -452,7 +452,7 @@ async def _():
         plans = user.exchange_plans
         for plan in plans:
             good_detail_status, good = await get_good_detail(plan.good)
-            if not good_detail_status or (good.time and good.time < time.time()):
+            if not good_detail_status or not good.time or good.time < time.time():
                 # 若商品不存在则删除
                 # 若重启时兑换超时则删除该兑换
                 user.exchange_plans.remove(plan)

@@ -9,6 +9,7 @@ import random
 import string
 import time
 import uuid
+from copy import deepcopy
 from pathlib import Path
 from typing import (TYPE_CHECKING, Dict, Literal,
                     Union, Optional, Tuple, Iterable, List)
@@ -22,10 +23,11 @@ from nonebot import Adapter, Bot
 from nonebot.adapters import Message
 from nonebot.adapters.onebot.v11 import MessageEvent as OneBotV11MessageEvent, PrivateMessageEvent, GroupMessageEvent, \
     Adapter as OneBotV11Adapter, Bot as OneBotV11Bot, ActionFailed as OneBotV11ActionFailed
-from nonebot.adapters.qqguild import DirectMessageCreateEvent, MessageCreateEvent, \
+from nonebot.adapters.qq import DirectMessageCreateEvent, MessageCreateEvent, \
     Adapter as QQGuildAdapter, Bot as QQGuildBot, MessageSegment as QQGuildMessageSegment, Message as QQGuildMessage
-from nonebot.adapters.qqguild.api import DMS
-from nonebot.adapters.qqguild.exception import ActionFailed as QQGuildActionFailed, AuditException
+
+from nonebot.adapters.qq.exception import ActionFailed as QQGuildActionFailed, AuditException
+from nonebot.adapters.qq.models import DMS
 from nonebot.exception import ActionFailed
 from nonebot.internal.matcher import Matcher
 from nonebot.log import logger
@@ -237,7 +239,7 @@ async def get_validate(gt: str = None, challenge: str = None, retry: bool = True
         return GeetestResult("", "")
     params = {"gt": gt, "challenge": challenge}
     params.update(_conf.preference.geetest_params)
-    content = _conf.preference.geetest_json or Preference().geetest_json
+    content = deepcopy(_conf.preference.geetest_json or Preference().geetest_json)
     for key, value in content.items():
         if isinstance(value, str):
             content[key] = value.format(gt=gt, challenge=challenge)

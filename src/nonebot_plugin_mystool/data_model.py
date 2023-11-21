@@ -7,6 +7,7 @@ from abc import abstractmethod
 from datetime import datetime
 from typing import Optional, Literal, NamedTuple, no_type_check, Union, Dict, Any, TypeVar, Tuple
 
+import pytz
 from pydantic import BaseModel
 
 
@@ -66,7 +67,7 @@ class Good(BaseModelWithUpdate):
     next_time: Optional[int]
     """为 0 表示任何时间均可兑换或兑换已结束"""
     status: Optional[Literal["online", "not_in_sell"]]
-    sale_start_time: Optional[str]
+    sale_start_time: Optional[int]
     time_by_detail: Optional[int]
     next_num: Optional[int]
     account_exchange_num: int
@@ -112,19 +113,17 @@ class Good(BaseModelWithUpdate):
         """
         兑换时间
 
-        :return:
-        如果返回`None`，说明任何时间均可兑换或兑换已结束。
-        如果返回`0`，说明该商品需要调用获取详细信息的API才能获取兑换时间
+        :return: 如果返回`None`，说明任何时间均可兑换或兑换已结束。
         """
         # "next_time" 为 0 表示任何时间均可兑换或兑换已结束
         if self.next_time == 0:
             return None
-        elif self.status == "not_in_sell" and self.sale_start_time is not None:
-            return int(self.sale_start_time)
-        elif self.status == "online":
-            return self.next_time
+        # TODO: 暂时不知道为何 self.sale_start_time 是 str 类型而不是 int 类型
+        sale_start_time = int(self.sale_start_time) if self.sale_start_time else 0
+        if sale_start_time and time.time() < sale_start_time < self.next_time:
+            return sale_start_time
         else:
-            return 0
+            return self.next_time
 
     @property
     def time_text(self):
@@ -139,7 +138,13 @@ class Good(BaseModelWithUpdate):
         elif self.time == 0:
             return None
         elif self.time_limited:
-            return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(self.time))
+            from .plugin_data import PluginDataManager
+            if zone := PluginDataManager.plugin_data.preference.timezone:
+                tz_info = pytz.timezone(zone)
+                date_time = datetime.fromtimestamp(self.time, tz_info)
+            else:
+                date_time = datetime.fromtimestamp(self.time)
+            return date_time.strftime("%Y-%m-%d %H:%M:%S")
         else:
             return "任何时间"
 

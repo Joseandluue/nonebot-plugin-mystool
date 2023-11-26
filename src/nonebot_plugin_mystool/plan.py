@@ -541,7 +541,7 @@ async def starrail_note_check(user: UserData, user_ids: Iterable[str], matcher: 
                 if note.current_stamina >= account.user_stamina_threshold:
                     # 防止重复提醒
                     if not starrail_notice.current_stamina_full:
-                        if note.current_stamina >= 180:
+                        if note.current_stamina >= note.max_stamina:
                             starrail_notice.current_stamina_full = True
                             msg += '❕您的开拓力已经溢出\n'
                             do_notice = True
@@ -582,7 +582,7 @@ async def starrail_note_check(user: UserData, user_ids: Iterable[str], matcher: 
 
             msg += "❖星穹铁道·实时便笺❖" \
                    f"\n🆔账户 {account.bbs_uid}" \
-                   f"\n⏳开拓力数量：{note.current_stamina} / 180" \
+                   f"\n⏳开拓力数量：{note.current_stamina} / {note.max_stamina}" \
                    f"\n⏱开拓力{note.stamina_recover_text}" \
                    f"\n📒每日实训：{note.current_train_score} / {note.max_train_score}" \
                    f"\n📅每日委托：{note.accepted_expedition_num} / 4" \

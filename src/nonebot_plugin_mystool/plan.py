@@ -534,14 +534,16 @@ async def starrail_note_check(user: UserData, user_ids: Iterable[str], matcher: 
             # 手动查询体力时，无需判断是否溢出
             if not matcher:
                 do_notice = False
-                starrail_notice.current_train_score= False
+                now_time = datetime.now().time()
+                notice_time = now_time > time(12, 0)
+                #starrail_notice.current_train_score= False
 
                 """记录是否需要提醒"""
                 # 体力溢出提醒
                 if note.current_stamina >= account.user_stamina_threshold:
                     # 防止重复提醒
                     if not starrail_notice.current_stamina_full:
-                        if note.current_stamina >= 180:
+                        if note.current_stamina >= note.max_stamina:
                             starrail_notice.current_stamina_full = True
                             msg += '❕您的开拓力已经溢出\n'
                             do_notice = True
@@ -555,10 +557,10 @@ async def starrail_note_check(user: UserData, user_ids: Iterable[str], matcher: 
                     starrail_notice.current_stamina_full = False
 
                 # 每日实训状态提醒
-                if note.current_train_score != note.max_train_score \
-                        and _conf.preference.alerted_time_bool  :
+                if note.current_train_score != note.max_train_score: #\
+                        #and _conf.preference.alerted_time_bool  :
                     # 防止重复提醒
-                    if not starrail_notice.current_train_score:
+                    if not starrail_notice.current_train_score and notice_time:
                         starrail_notice.current_train_score = True
                         msg += '❕您的每日实训未完成\n'
                         do_notice = True
@@ -566,8 +568,7 @@ async def starrail_note_check(user: UserData, user_ids: Iterable[str], matcher: 
                     starrail_notice.current_train_score = False
 
                 # 每周模拟宇宙积分提醒
-                if note.current_rogue_score != note.max_rogue_score \
-                        and _conf.preference.alerted_time_bool  :
+                if note.current_rogue_score != note.max_rogue_score and notice_time:
                     # 防止重复提醒
                     if not starrail_notice.current_rogue_score:
                         starrail_notice.current_rogue_score = True
@@ -582,7 +583,7 @@ async def starrail_note_check(user: UserData, user_ids: Iterable[str], matcher: 
 
             msg += "❖星穹铁道·实时便笺❖" \
                    f"\n🆔账户 {account.bbs_uid}" \
-                   f"\n⏳开拓力数量：{note.current_stamina} / 180" \
+                   f"\n⏳开拓力数量：{note.current_stamina} / 240" \
                    f"\n⏱开拓力{note.stamina_recover_text}" \
                    f"\n📒每日实训：{note.current_train_score} / {note.max_train_score}" \
                    f"\n📅每日委托：{note.accepted_expedition_num} / 4" \

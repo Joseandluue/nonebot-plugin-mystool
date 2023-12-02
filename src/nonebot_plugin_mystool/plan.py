@@ -184,7 +184,7 @@ async def perform_game_sign(
                     )
             continue
         games_has_record = []
-        for class_type in BaseGameSign.AVAILABLE_GAME_SIGNS:
+        for class_type in BaseGameSign.available_game_signs:
             signer = class_type(account, records)
             if not signer.has_record:
                 continue
@@ -214,11 +214,11 @@ async def perform_game_sign(
                         sign_status, _ = await signer.sign(account.platform, mmt_data, geetest_result)
                 if not sign_status and (user.enable_notice or matcher):
                     if sign_status.login_expired:
-                        message = f"⚠️账户 {account.bbs_uid} 🎮『{signer.NAME}』签到时服务器返回登录失效，请尝试重新登录绑定账户"
+                        message = f"⚠️账户 {account.bbs_uid} 🎮『{signer.name}』签到时服务器返回登录失效，请尝试重新登录绑定账户"
                     elif sign_status.need_verify:
-                        message = f"⚠️账户 {account.bbs_uid} 🎮『{signer.NAME}』签到时可能遇到验证码拦截，请尝试使用命令『/账号设置』更改设备平台，若仍失败请手动前往米游社签到"
+                        message = f"⚠️账户 {account.bbs_uid} 🎮『{signer.name}』签到时可能遇到验证码拦截，请尝试使用命令『/账号设置』更改设备平台，若仍失败请手动前往米游社签到"
                     else:
-                        message = f"⚠️账户 {account.bbs_uid} 🎮『{signer.NAME}』签到失败，请稍后再试"
+                        message = f"⚠️账户 {account.bbs_uid} 🎮『{signer.name}』签到失败，请稍后再试"
                     if matcher:
                         await matcher.send(message)
                     elif user.enable_notice:
@@ -235,13 +235,13 @@ async def perform_game_sign(
                 get_info_status, info = await signer.get_info(account.platform)
                 get_award_status, awards = await signer.get_rewards()
                 if not get_info_status or not get_award_status:
-                    msg = f"⚠️账户 {account.bbs_uid} 🎮『{signer.NAME}』获取签到结果失败！请手动前往米游社查看"
+                    msg = f"⚠️账户 {account.bbs_uid} 🎮『{signer.name}』获取签到结果失败！请手动前往米游社查看"
                 else:
                     award = awards[info.total_sign_day - 1]
                     if info.is_sign:
                         status = "签到成功！" if not signed else "已经签到过了"
                         msg = f"🪪账户 {account.bbs_uid}" \
-                              f"\n🎮『{signer.NAME}』" \
+                              f"\n🎮『{signer.name}』" \
                               f"\n🎮状态: {status}" \
                               f"\n{signer.record.nickname}·{signer.record.level}" \
                               "\n\n🎁今日签到奖励：" \
@@ -251,7 +251,7 @@ async def perform_game_sign(
                         onebot_img_msg = OneBotV11MessageSegment.image(img_file)
                         qq_guild_img_msg = QQGuildMessageSegment.file_image(img_file)
                     else:
-                        msg = f"⚠️账户 {account.bbs_uid} 🎮『{signer.NAME}』签到失败！请尝试重新签到，若多次失败请尝试重新登录绑定账户"
+                        msg = f"⚠️账户 {account.bbs_uid} 🎮『{signer.name}』签到失败！请尝试重新签到，若多次失败请尝试重新登录绑定账户"
                 if matcher:
                     try:
                         if isinstance(event, OneBotV11MessageEvent):
@@ -555,21 +555,22 @@ async def starrail_note_check(user: UserData, user_ids: Iterable[str], matcher: 
                     starrail_notice.current_stamina_full = False
 
                 # 每日实训状态提醒
-                if note.current_train_score != note.max_train_score \
-                        and _conf.preference.alerted_time_bool  :
+                if note.current_train_score != note.max_train_score:
                     # 防止重复提醒
-                    if not starrail_notice.current_train_score:
-                        starrail_notice.current_train_score = True
-                        msg += '❕您的每日实训未完成\n'
+                    #if not starrail_notice.current_train_score:
+                    if not starrail_notice.current_train_score \
+                        and _conf.preference.notice_time:               #注意此处添加notice_time是为了防止每日首次推送通知在4:00后一段时间
+                        starrail_notice.current_train_score = True      #notice_time = plan_time +1h
+                        msg += '❕您的每日实训未完成\n'                  #通知逻辑变动后，如不添加notice_time，便笺检查在xx:20,便笺检查间隔1h，则每日首次通知在04:20
                         do_notice = True
                 else:
                     starrail_notice.current_train_score = False
 
                 # 每周模拟宇宙积分提醒
-                if note.current_rogue_score != note.max_rogue_score \
-                        and _conf.preference.alerted_time_bool  :
+                if note.current_rogue_score != note.max_rogue_score:
                     # 防止重复提醒
-                    if not starrail_notice.current_rogue_score:
+                    if not starrail_notice.current_rogue_score \
+                        and _conf.preference.notice_time:                #notice_time同理
                         starrail_notice.current_rogue_score = True
                         msg += '❕您的模拟宇宙积分还没打满\n\n'
                         do_notice = True

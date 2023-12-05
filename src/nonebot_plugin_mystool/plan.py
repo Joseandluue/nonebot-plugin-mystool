@@ -534,8 +534,6 @@ async def starrail_note_check(user: UserData, user_ids: Iterable[str], matcher: 
             # 手动查询体力时，无需判断是否溢出
             if not matcher:
                 do_notice = False
-                starrail_notice.current_train_score= False
-
                 """记录是否需要提醒"""
                 # 体力溢出提醒
                 if note.current_stamina >= account.user_stamina_threshold:

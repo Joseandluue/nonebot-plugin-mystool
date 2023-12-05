@@ -87,8 +87,6 @@ class Preference(BaseSettings, extra=Extra.ignore):
     '''每日自动签到和米游社任务的定时任务执行时间，格式为HH:MM'''
     resin_interval: int = 60
     '''每次检查原神便笺间隔，单位为分钟'''
-    alerted_time: str = "00:10"
-    '''崩铁便笺的每日实训开始提醒时间，格式为HH:MM'''
     geetest_url: Optional[str]
     '''极验Geetest人机验证打码接口URL'''
     geetest_params: Optional[Dict[str, Any]] = None

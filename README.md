@@ -1,12 +1,9 @@
-基于[Ljzd-PRO/nonebot-plugin-mystool](https://github.com/Ljzd-PRO/nonebot-plugin-mystool)/v1.4.0修改:
+基于[Ljzd-PRO/nonebot-plugin-mystool](https://github.com/Ljzd-PRO/nonebot-plugin-mystool)/v1.4.2修改:
 
 add：
 ```
 rrocr积分查询 
-alerted_time (plugin_data.json) 
-    用于崩铁的每日实训与模拟宇宙完成情况提醒时间
-    例如设置16：00，在16：00-次日03:59时如未完成实训（宇宙积分）
-    则会在每次检查崩铁便笺时发送未完成文本提醒
+铁道便笺中每日实训/模拟宇宙的通知将于签到时间1h后
 ```
 modify：
 ```

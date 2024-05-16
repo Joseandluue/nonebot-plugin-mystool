@@ -718,7 +718,7 @@ async def weibo_code_check(user: UserData, user_ids: Iterable[str], matcher: Mat
                     saa_img = Image(await get_file(img))
                     messages = msg + saa_img
                     for user_id in user_ids:
-                        logger.info(f"检测到当前超话有兑换码，正在给{user_id}推送信息中")
+                        logger.info(f"检测到{msg[:4]}超话有兑换码，正在给{user_id}推送信息中")
                         await send_private_msg(user_id=user_id, message=messages)
     else:
         message = "未开启微博功能"

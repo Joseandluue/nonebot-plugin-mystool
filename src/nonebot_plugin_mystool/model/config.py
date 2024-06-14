@@ -1,4 +1,5 @@
 import os
+import sys
 from datetime import time, timedelta, datetime
 from pathlib import Path
 from typing import Union, Optional, Tuple, Any, Dict, TYPE_CHECKING
@@ -152,7 +153,7 @@ class GoodListImageConfig(BaseModel):
     '''字体大小'''
     SAVE_PATH: Path = data_path
     '''商品列表图片缓存目录'''
-    MULTI_PROCESS: bool = True
+    MULTI_PROCESS: bool = sys.platform != "win32"
     '''是否使用多进程生成图片（如果生成图片时崩溃，可尝试关闭此选项）'''
 
 

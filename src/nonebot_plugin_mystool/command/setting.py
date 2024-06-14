@@ -6,10 +6,10 @@ from nonebot.matcher import Matcher
 from nonebot.params import T_State
 
 from ..api import BaseMission
+from ..api.weibo import Tool
 from ..command.common import CommandRegistry
 from ..model import PluginDataManager, plugin_config, UserAccount, CommandUsage, UserData
 from ..utils import COMMAND_BEGIN, GeneralMessageEvent
-from ..api.weibo import tool
 
 __all__ = ["setting", "account_setting", "global_setting"]
 
@@ -167,8 +167,8 @@ async def _(event: Union[GeneralMessageEvent], state: T_State, setting_id=ArgStr
                     if k_u == 'name':
                         count += 1
                         msg += f"\n{count}. {str(v_u)}"
-        msg += f"\n发送“添加账号”或已有账号名称进行添加/修改"
-        msg += f"\n发送“删除账号”进行账号删除"
+
+        msg += "\n发送“添加账号”或已有账号名称进行添加/修改"
         msg += "\n\n🚪发送“退出”即可退出"
         await account_setting.send(msg)
         state["setting_item"] = "setting_wbitem"
@@ -315,7 +315,7 @@ async def _(_: Union[GeneralMessageEvent], state: T_State, setting_value=ArgStr(
     # 做区分，以下应用在用户数据中，而非米游社数据中
     elif state["setting_item"] == "setting_weibo_account":
         user: UserData = state["user"]
-        userdata_dict = tool.Weibo_UserDict(setting_value)
+        userdata_dict = Tool.Weibo_UserDict(setting_value)
         if len(user.weibo) > 0:
             for usr in user.weibo:
                 if usr['name'] == userdata_dict['name']:

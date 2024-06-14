@@ -1,7 +1,7 @@
+import copy
+import json
 import random
 import re
-import json
-import copy
 from datetime import date
 from urllib.parse import unquote
 
@@ -9,28 +9,29 @@ import httpx
 
 from ..utils import logger
 
-class tool():
+
+class Tool:
     @staticmethod
     def cookie_to_dict(cookie):
         if cookie and '=' in cookie:
             cookie = dict([line.strip().split('=', 1) for line in cookie.split(';')])
         return cookie
 
-    @staticmethod
-    def nested_lookup(obj, key, with_keys=False, fetch_first=False):
-        result = list(tool._nested_lookup(obj, key, with_keys=with_keys))
+    @classmethod
+    def nested_lookup(cls, obj, key, with_keys=False, fetch_first=False):
+        result = list(cls._nested_lookup(obj, key, with_keys=with_keys))
         if with_keys:
-            values = [v for k, v in tool._nested_lookup(obj, key, with_keys=with_keys)]
+            values = [v for k, v in cls._nested_lookup(obj, key, with_keys=with_keys)]
             result = {key: values}
         if fetch_first:
             result = result[0] if result else result
         return result
 
-
-    def _nested_lookup(obj, key, with_keys=False):
+    @classmethod
+    def _nested_lookup(cls, obj, key, with_keys=False):
         if isinstance(obj, list):
             for i in obj:
-                yield from tool._nested_lookup(i, key, with_keys=with_keys)
+                yield from cls._nested_lookup(i, key, with_keys=with_keys)
         if isinstance(obj, dict):
             for k, v in obj.items():
                 if key == k:
@@ -39,17 +40,18 @@ class tool():
                     else:
                         yield v
                 if isinstance(v, (list, dict)):
-                    yield from tool._nested_lookup(v, key, with_keys=with_keys)
+                    yield from cls._nested_lookup(v, key, with_keys=with_keys)
 
     @staticmethod
-    def Weibo_UserDict(data):
+    def weibo_user_dict(data):
         return dict([line.strip().split(':', 1) for line in data.split('|')])
+
 
 class WeiboCode:
     def __init__(self, user_data: dict):
-        self.params = tool.cookie_to_dict(user_data['params'].replace('&', ';')) if user_data['params'] else None
+        self.params = Tool.cookie_to_dict(user_data['params'].replace('&', ';')) if user_data['params'] else None
         """params: s=xxxxxx; gsid=xxxxxx; aid=xxxxxx; from=xxxxxx"""
-        self.cookie = tool.cookie_to_dict(user_data['cookie'])
+        self.cookie = Tool.cookie_to_dict(user_data['cookie'])
         self.container_id = {'原神': '100808fc439dedbb06ca5fd858848e521b8716',
                              '崩铁': '100808e1f868bf9980f09ab6908787d7eaf0f0'}
         self.ua = 'WeiboOverseas/4.4.6 (iPhone; iOS 14.0.1; Scale/2.00)'
@@ -68,7 +70,7 @@ class WeiboCode:
             async with httpx.AsyncClient() as client:
                 response = await client.get(url)
             responses = response.json()
-            group = tool.nested_lookup(responses, 'group', fetch_first=True)
+            group = Tool.nested_lookup(responses, 'group', fetch_first=True)
             if group:
                 ticket_id[key] = {}
                 ticket_id[key]['id'] = [i
@@ -136,10 +138,12 @@ class WeiboCode:
         else:
             return ticket_id
 
-class WeiboSign():
-    
+
+class WeiboSign:
+
+    @staticmethod
     async def format_chaohua_data(data: list):
-        '''
+        """
         单个超话社区格式：
         {
             "card_type": "8",
@@ -172,10 +176,10 @@ class WeiboSign():
             "openurl": "",
             "cleaned": true
         },
-        '''
-        #去除杂项字典
+        """
+        # 去除杂项字典
         data = [ch for ch in data if ch.get('card_type') == '8']
-        CHAOHUA_list = []
+        chaohua_list = []
         for onedata in data:
             ch_id = re.findall("(?<=containerid=).*?(?=&)", onedata['scheme'])
             one_dict = {
@@ -183,10 +187,11 @@ class WeiboSign():
                 'id': ch_id[0],
                 'is_sign': onedata['buttons'][0]['name']  # '已签' / '签到'
             }
-            CHAOHUA_list.append(one_dict)
-        return CHAOHUA_list
+            chaohua_list.append(one_dict)
+        return chaohua_list
 
-    async def ch_list(params_data: dict, wb_userdata: dict):
+    @classmethod
+    async def ch_list(cls, params_data: dict, wb_userdata: dict):
 
         try:
             url = 'https://api.weibo.cn/2/cardlist?'
@@ -201,11 +206,11 @@ class WeiboSign():
                 "User-Agent": "Mi+10_12_WeiboIntlAndroid_6020",
                 "Host": "api.weibo.cn"
             }
-            cookies = tool.cookie_to_dict(wb_userdata['cookie'])
+            cookies = Tool.cookie_to_dict(wb_userdata['cookie'])
             async with httpx.AsyncClient() as client:
                 res = await client.get(url, headers=headers, params=params, cookies=cookies)
             json_chdata = json.load(res)['cards'][0]['card_group']
-            list_data = await WeiboSign.format_chaohua_data(json_chdata)
+            list_data = await cls.format_chaohua_data(json_chdata)
             wb_userdata['CHdata_list'] = list_data
             return list_data
         except KeyError:
@@ -216,10 +221,10 @@ class WeiboSign():
             return '可能是微博相关参数出错，请重新设置'
         except Exception as e:
             # print(f'{type(e)}: {e}')
-            return  e
+            return e
 
-    @staticmethod
-    async def sign(wb_userdata: dict):
+    @classmethod
+    async def sign(cls, wb_userdata: dict):
 
         url = 'https://api.weibo.cn/2/page/button'
         request_url = 'http://i.huati.weibo.com/mobile/super/active_checkin?pageid={containerid}'
@@ -228,20 +233,20 @@ class WeiboSign():
             'Referer': 'https://m.weibo.cn'
         }
 
-        param_d = tool.cookie_to_dict(wb_userdata['params'])
+        param_d = Tool.cookie_to_dict(wb_userdata['params'])
 
         params = {
-            "gsid": param_d['gsid'] if 'gsid' in param_d else None,        # 账号身份验证
-            "s": param_d['s'] if 's' in param_d else None,                 # 校验参数
-            "from": param_d['from'] if 'from' in param_d else None,        # 客户端身份验证
-            "c": param_d['c'] if 'c' in param_d else None,                 # 客户端身份验证
-            "aid": param_d['aid'] if 'aid' in param_d else None,           # 作用未知
+            "gsid": param_d['gsid'] if 'gsid' in param_d else None,  # 账号身份验证
+            "s": param_d['s'] if 's' in param_d else None,  # 校验参数
+            "from": param_d['from'] if 'from' in param_d else None,  # 客户端身份验证
+            "c": param_d['c'] if 'c' in param_d else None,  # 客户端身份验证
+            "aid": param_d['aid'] if 'aid' in param_d else None,  # 作用未知
         }
 
         msg = f'{date.today()}\n' \
-                '微博超话签到：\n'
+              '微博超话签到：\n'
         try:
-            chaohua_list = await WeiboSign.ch_list(params, wb_userdata)
+            chaohua_list = await cls.ch_list(params, wb_userdata)
             if not isinstance(chaohua_list, list):
                 return f'签到失败请重新签到\n{chaohua_list}'
             for ch in chaohua_list:
@@ -251,13 +256,13 @@ class WeiboSign():
                     async with httpx.AsyncClient() as client:
                         res = await client.get(url, headers=headers, params=params_copy, timeout=10)
                     res_data = json.loads(res.text)
-                    if 'msg' in res_data and 'errmsg' not in res_data:      # 今日首次签到成功                
+                    if 'msg' in res_data and 'errmsg' not in res_data:  # 今日首次签到成功
                         msg += f"{ch['title_sub']}  ✅\n"
-                    elif 'errmsg' in res_data :                             # 签到出错
+                    elif 'errmsg' in res_data:  # 签到出错
                         # msg = f"{res_data['errmsg']}\n"
                         msg += f"{ch['title_sub']}  ❌\n"
                         msg += f"--{res_data['errmsg']}\n"
-                elif ch['is_sign'] == '已签':                               # 今日再次进行签到，且之前已经签到成功
+                elif ch['is_sign'] == '已签':  # 今日再次进行签到，且之前已经签到成功
                     msg += f"{ch['title_sub']}  ✅\n"
             return msg
         except Exception as e:

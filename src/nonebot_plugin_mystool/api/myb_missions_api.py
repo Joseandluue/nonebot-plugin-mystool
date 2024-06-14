@@ -113,6 +113,7 @@ class BaseMission:
         """
         签到
 
+        :param user: 用户数据对象
         :param retry: 是否允许重试
         :return: (BaseApiStatus, 签到获得的米游币数量)
         """

@@ -651,6 +651,7 @@ async def starrail_note_check(user: UserData, user_ids: Iterable[str], matcher: 
 
 manually_weibo_code_check = on_command(plugin_config.preference.command_start + 'wb兑换', priority=5, block=True)
 
+
 @manually_weibo_code_check.handle()
 async def weibo_code(event: Union[GeneralMessageEvent], matcher: Matcher):
     if isinstance(event, GeneralGroupMessageEvent):
@@ -660,7 +661,9 @@ async def weibo_code(event: Union[GeneralMessageEvent], matcher: Matcher):
         user = PluginDataManager.plugin_data.users.get(user_id)
         await weibo_code_check(user=user, user_ids=[user_id], matcher=matcher)
 
+
 manually_weibo_sign_check = on_command(plugin_config.preference.command_start + 'wb签到', priority=5, block=True)
+
 
 @manually_weibo_sign_check.handle()
 async def weibo_sign(event: Union[GeneralMessageEvent], matcher: Matcher):
@@ -692,7 +695,7 @@ async def weibo_code_check(user: UserData, user_ids: Iterable[str], matcher: Mat
     :param user_ids: 发送通知的所有用户ID
     :param matcher: nonebot ``Matcher``
     """
-    
+
     if user.enable_weibo:
         # account = UserAccount(account) 
         for user_data in user.weibo:
@@ -780,6 +783,3 @@ async def auto_weibo_check():
         await weibo_sign_check(user=user, user_ids=user_ids)
         await weibo_code_check(user=user, user_ids=user_ids)
     logger.info(f"{plugin_config.preference.log_head}微博自动任务执行完成")
-
-
-

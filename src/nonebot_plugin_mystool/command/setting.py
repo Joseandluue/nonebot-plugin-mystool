@@ -193,7 +193,7 @@ async def _(_: Union[GeneralMessageEvent], state: T_State, notice_game=ArgStr())
         if notice_game == "1":
             await account_setting.send(
                 "请输入想要所需通知阈值，树脂达到该值时将进行通知："
-                "可用范围 [0, 160]"
+                "可用范围 [0, 200]"
                 "\n\n🚪发送“退出”即可退出"
             )
             state["setting_item"] = "setting_notice_value_op"
@@ -239,14 +239,14 @@ async def _(_: Union[GeneralMessageEvent], state: T_State, setting_value=ArgStr(
         except ValueError:
             await account_setting.reject("⚠️请输入有效的数字。")
         else:
-            if 0 <= resin_threshold <= 160:
+            if 0 <= resin_threshold <= 200:
                 # 输入有效的数字范围，将 resin_threshold 赋值为输入的整数
                 account.user_resin_threshold = resin_threshold
                 PluginDataManager.write_plugin_data()
                 await account_setting.finish("更改原神便笺树脂提醒阈值成功\n"
                                              f"⏰当前提醒阈值：{resin_threshold}")
             else:
-                await account_setting.reject("⚠️输入的数字范围应在 0 到 160 之间。")
+                await account_setting.reject("⚠️输入的数字范围应在 0 到 200 之间。")
 
     elif state["setting_item"] == "setting_notice_value_sr":
         try:

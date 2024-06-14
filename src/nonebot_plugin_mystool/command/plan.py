@@ -518,7 +518,7 @@ async def genshin_note_check(user: UserData, user_ids: Iterable[str], matcher: M
                 if note.current_resin >= account.user_resin_threshold:
                     # 防止重复提醒
                     if not genshin_notice.current_resin_full:
-                        if note.current_resin == 160:
+                        if note.current_resin == 200:
                             genshin_notice.current_resin_full = True
                             msg += '❕您的树脂已经满啦\n'
                             do_notice = True
@@ -560,7 +560,7 @@ async def genshin_note_check(user: UserData, user_ids: Iterable[str], matcher: M
 
             msg += "❖原神·实时便笺❖" \
                    f"\n🆔账户 {account.display_name}" \
-                   f"\n⏳树脂数量：{note.current_resin} / 160" \
+                   f"\n⏳树脂数量：{note.current_resin} / 200" \
                    f"\n⏱️树脂{note.resin_recovery_text}" \
                    f"\n🕰️探索派遣：{note.current_expedition_num} / {note.max_expedition_num}" \
                    f"\n📅每日委托：{4 - note.finished_task_num} 个任务未完成" \

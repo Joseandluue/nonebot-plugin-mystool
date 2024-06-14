@@ -212,6 +212,8 @@ class WeiboSign():
             return '找不到超话列表'
         except IndexError:
             return '超话列表为空'
+        except ValueError:
+            return '可能是微博相关参数出错，请重新设置'
         except Exception as e:
             # print(f'{type(e)}: {e}')
             return  e

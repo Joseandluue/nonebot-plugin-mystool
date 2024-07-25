@@ -36,7 +36,6 @@
         logger.exception(f"{plugin_config.preference.log_head}获取人机验证validate失败")
 ```
 
-由于套套采用请求体传参，`params.update(plugin_config.preference.geetest_params)`要进行注释
 
 ！需要注意的是插件中人机验证的用户变量暂未适配套套，套套目前只能使用全局变量进行人机验证
 
